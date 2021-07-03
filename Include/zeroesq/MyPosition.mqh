@@ -150,10 +150,8 @@ ulong CMyPositionInfo::SelectPositionByMagic(ulong pMagic)
 //+------------------------------------------------------------------+
 bool CMyPositionInfo::ModifySLTP(ulong pTicket, ulong pMagic, double pSL, double pTP, double pVolume)
 {
-   MqlTradeRequest request;
-   MqlTradeResult result;
-   ZeroMemory(request);
-   ZeroMemory(result);
+   MqlTradeRequest request = {};
+   MqlTradeResult result = {};
    
    request.action = TRADE_ACTION_SLTP;
    request.position = pTicket;

@@ -8,7 +8,7 @@
 #property version   "1.00"
 
 #include <zeroesq\MyTrade.mqh>
-#include <zeroesq\MyPositionInfo.mqh>
+#include <zeroesq\MyPosition.mqh>
 #include <zeroesq\MyPriceBars.mqh>
 #include <zeroesq\MyPending.mqh>
 

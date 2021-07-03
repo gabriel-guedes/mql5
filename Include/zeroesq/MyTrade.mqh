@@ -37,10 +37,6 @@ public:
    //bool  ModifyPosition(string pSymbol,double pStop,double pProfit=0);
    bool  Close(string pSymbol,double pVolume=0,string pComment=NULL);
    bool  RemoveOrder(ulong pTicket);
-   //bool              LinearGridSell(double pPrice, double pVolume, int pLevels, double pPoints, string pComment);
-   //bool              LinearGridBuy(double pPrice, double pVolume, int pLevels, double pPoints, string pComment);
-   //bool              OppositeOrder(string pSymbol, ENUM_ORDER_TYPE pType, double pVolume, double pPrice, string pComment);
- 
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
