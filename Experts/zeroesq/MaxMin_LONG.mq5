@@ -7,10 +7,10 @@
 #property link      "twitter.com/gabriel_guedes"
 #property version   "1.00"
 
-#include <Gabriel\MyTrade.mqh>
-#include <Gabriel\MyPositionInfo.mqh>
-#include <Gabriel\MyPriceBars.mqh>
-#include <Gabriel\MyPending.mqh>
+#include <zeroesq\MyTrade.mqh>
+#include <zeroesq\MyPositionInfo.mqh>
+#include <zeroesq\MyPriceBars.mqh>
+#include <zeroesq\MyPending.mqh>
 
 input ulong    inpDeviation = 4;
 input double   inpTradeVolume = 1.0;

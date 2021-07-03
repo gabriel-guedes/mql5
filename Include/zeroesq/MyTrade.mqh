@@ -6,7 +6,7 @@
 #property copyright "Gabriel Guedes de Sena"
 #property link      "twitter.com/gabriel_guedes"
 
-#include <Gabriel\errordescription.mqh>
+#include <zeroesq\errordescription.mqh>
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
