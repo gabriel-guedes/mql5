@@ -13,7 +13,7 @@
 #include <zeroesq\MyPending.mqh>
 #include <zeroesq\MyUtils.mqh>
 
-input string   inpExpertName;
+input string   inpExpertName="MaxMinLong";
 input double   inpTradeVolume = 1.0;
 
 CMyPosition position;
@@ -55,18 +55,18 @@ void OnTick()
 
    if(!bars.IsNewBar()) return;
 
-   ulong positionTicket = position.SelectPositionByMagic(EXPERT_MAGIC);
+   ulong positionTicket = position.SelectPositionByMagic(trade.GetMagic());
 
    if(positionTicket != NULL) {
       double takeProfit = bars.GetLowestHigh();
-      position.ModifySLTP(positionTicket, EXPERT_MAGIC, 0, takeProfit, inpTradeVolume);
+      position.ModifySLTP(positionTicket, trade.GetMagic(), 0, takeProfit, inpTradeVolume);
 
    } else {
       double previousLow = bars.GetLow(1);
       double highestHigh = bars.GetHighestHigh();
       double currentOpen = bars.GetOpen(0);
       if(currentOpen > previousLow) {
-         pending.CancelOrdersByMagic(EXPERT_MAGIC);
+         pending.CancelOrdersByMagic(trade.GetMagic());
          trade.BuyLimit(_Symbol, inpTradeVolume, previousLow, 0, highestHigh);
       }
 

@@ -29,6 +29,7 @@ public:
    void              SetMagicNumber(ulong pMagic);
    void              SetDeviation(ulong pDeviation);
    void              SetFillType(ENUM_ORDER_TYPE_FILLING pFilltype);
+   ulong             GetMagic();
    bool              BuyMarket(string pSymbol, double pVolume, double pStop = 0, double pProfit = 0, string pComment = NULL);
    bool              SellMarket(string pSymbol, double pVolume, double pStop = 0, double pProfit = 0, string pComment = NULL);
    bool              BuyStop(string pSymbol, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
@@ -69,6 +70,13 @@ void CMyTrade::SetDeviation(ulong pDeviation)
 void CMyTrade::SetFillType(ENUM_ORDER_TYPE_FILLING pFilltype)
 {
    mFillType = pFilltype;
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+ulong CMyTrade::GetMagic(void)
+{
+   return mMagic;
 }
 //+------------------------------------------------------------------+
 //| Open Position                                                    |
