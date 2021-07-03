@@ -7,7 +7,7 @@
 #property link      "twitter.com/gabriel_guedes"
 #define EXPERT_MAGIC 123456
 
-class CMyPositionInfo
+class CMyPosition
   {
    private:
       double mEADayProfit;
@@ -16,7 +16,7 @@ class CMyPositionInfo
       double mTickValue;
 
    public:
-      CMyPositionInfo(void);
+      CMyPosition(void);
       void     CalcEADayProfit(string pSymbol, ulong pMagic);
       double   GetEADayProfit();
       void     CalcEAOpenProfit(string pSymbol, ulong pMagic);
@@ -32,7 +32,7 @@ class CMyPositionInfo
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-CMyPositionInfo::CMyPositionInfo(void)
+CMyPosition::CMyPosition(void)
 {
    mTickSize=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);
    mTickValue=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_VALUE);
@@ -40,7 +40,7 @@ CMyPositionInfo::CMyPositionInfo(void)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-void CMyPositionInfo::CalcEADayProfit(string pSymbol,ulong pMagic)
+void CMyPosition::CalcEADayProfit(string pSymbol,ulong pMagic)
   {
    MqlDateTime from_date,to_date;
    TimeCurrent(from_date);
@@ -75,14 +75,14 @@ void CMyPositionInfo::CalcEADayProfit(string pSymbol,ulong pMagic)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CMyPositionInfo::GetEADayProfit()
+double CMyPosition::GetEADayProfit()
 {
    return(mEADayProfit);
 }    
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-void CMyPositionInfo::CalcEAOpenProfit(string pSymbol,ulong pMagic)
+void CMyPosition::CalcEAOpenProfit(string pSymbol,ulong pMagic)
 {
   
   mEAOpenProfit=0;
@@ -103,19 +103,19 @@ void CMyPositionInfo::CalcEAOpenProfit(string pSymbol,ulong pMagic)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CMyPositionInfo::GetEAOpenProfit()
+double CMyPosition::GetEAOpenProfit()
 {
    return(mEAOpenProfit);
 }  
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CMyPositionInfo::BreakEven()
+double CMyPosition::BreakEven()
 {
    return(0);
 };
   
-double CMyPositionInfo::AdjustToTickSize(double pPoints)
+double CMyPosition::AdjustToTickSize(double pPoints)
 {
    double lAdjusted=(MathFloor(pPoints/mTickSize)*mTickSize);
    return(lAdjusted);
@@ -123,14 +123,14 @@ double CMyPositionInfo::AdjustToTickSize(double pPoints)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CMyPositionInfo::GetEATotalProfit(void)
+double CMyPosition::GetEATotalProfit(void)
 {
    return(mEAOpenProfit+mEADayProfit);
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-ulong CMyPositionInfo::SelectPositionByMagic(ulong pMagic)
+ulong CMyPosition::SelectPositionByMagic(ulong pMagic)
 {
    uint total=PositionsTotal();
    
@@ -148,7 +148,7 @@ ulong CMyPositionInfo::SelectPositionByMagic(ulong pMagic)
 //+------------------------------------------------------------------+
 //| Change Position Take Profit                                      |
 //+------------------------------------------------------------------+
-bool CMyPositionInfo::ModifySLTP(ulong pTicket, ulong pMagic, double pSL, double pTP, double pVolume)
+bool CMyPosition::ModifySLTP(ulong pTicket, ulong pMagic, double pSL, double pTP, double pVolume)
 {
    MqlTradeRequest request = {};
    MqlTradeResult result = {};

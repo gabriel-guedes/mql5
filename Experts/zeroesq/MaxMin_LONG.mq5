@@ -11,16 +11,17 @@
 #include <zeroesq\MyPosition.mqh>
 #include <zeroesq\MyPriceBars.mqh>
 #include <zeroesq\MyPending.mqh>
+#include <zeroesq\MyUtils.mqh>
 
-input ulong    inpDeviation = 4;
+input ulong    inpDeviation = 50;
 input double   inpTradeVolume = 1.0;
 
 #define EXPERT_MAGIC 123456
 
-CMyPositionInfo      position;
-CMyTrade             trade;
-CMyBars              bars;
-CMyPending           pending;
+CMyPosition position;
+CMyTrade    trade;
+CMyBars     bars;
+CMyPending  pending;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
