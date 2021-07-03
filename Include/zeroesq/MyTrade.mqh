@@ -26,7 +26,9 @@ private:
 
 public:
                      CMyTrade(void);
-   void              Init(ulong pMagic, ulong pDeviation, ENUM_ORDER_TYPE_FILLING pFilltype);
+   void              SetMagicNumber(ulong pMagic);
+   void              SetDeviation(ulong pDeviation);
+   void              SetFillType(ENUM_ORDER_TYPE_FILLING pFilltype);
    bool              BuyMarket(string pSymbol, double pVolume, double pStop = 0, double pProfit = 0, string pComment = NULL);
    bool              SellMarket(string pSymbol, double pVolume, double pStop = 0, double pProfit = 0, string pComment = NULL);
    bool              BuyStop(string pSymbol, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
@@ -40,7 +42,7 @@ public:
    bool              RemoveOrder(ulong pTicket);
 };
 //+------------------------------------------------------------------+
-//|                                                                  |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
 void CMyTrade::CMyTrade(void)
 {
@@ -48,12 +50,24 @@ void CMyTrade::CMyTrade(void)
    mFillType = ORDER_FILLING_IOC;
 }
 //+------------------------------------------------------------------+
-//|                                                                  |
+//| SetMagicNumber                                                   |
 //+------------------------------------------------------------------+
-void CMyTrade::Init(ulong pMagic, ulong pDeviation, ENUM_ORDER_TYPE_FILLING pFilltype)
+void CMyTrade::SetMagicNumber(ulong pMagic)
 {
    mMagic = pMagic;
+}
+//+------------------------------------------------------------------+
+//| Set Deviation                                                    |
+//+------------------------------------------------------------------+
+void CMyTrade::SetDeviation(ulong pDeviation)
+{
    mDeviation = pDeviation;
+}
+//+------------------------------------------------------------------+
+//| Set FillType                                                     |
+//+------------------------------------------------------------------+
+void CMyTrade::SetFillType(ENUM_ORDER_TYPE_FILLING pFilltype)
+{
    mFillType = pFilltype;
 }
 //+------------------------------------------------------------------+

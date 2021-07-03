@@ -13,24 +13,26 @@
 #include <zeroesq\MyPending.mqh>
 #include <zeroesq\MyUtils.mqh>
 
-input ulong    inpDeviation = 50;
+input string   inpExpertName;
 input double   inpTradeVolume = 1.0;
-
-#define EXPERT_MAGIC 123456
 
 CMyPosition position;
 CMyTrade    trade;
 CMyBars     bars;
 CMyPending  pending;
+CMyUtils    utils;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit()
 {
-//--- create timer
-   EventSetTimer(86400);
+   if(!utils.IsValidExpertName(inpExpertName)) {
+      Print("ERROR - Init Failed - Null/Empty Expert name.");
+      return(INIT_FAILED);
+   }
 
-   trade.Init(EXPERT_MAGIC, inpDeviation, ORDER_FILLING_IOC);
+   ulong magic_number = utils.StringToMagic(inpExpertName);
+   trade.SetMagicNumber(magic_number);
 
    return(INIT_SUCCEEDED);
 
@@ -54,7 +56,7 @@ void OnTick()
    if(!bars.IsNewBar()) return;
 
    ulong positionTicket = position.SelectPositionByMagic(EXPERT_MAGIC);
-   
+
    if(positionTicket != NULL) {
       double takeProfit = bars.GetLowestHigh();
       position.ModifySLTP(positionTicket, EXPERT_MAGIC, 0, takeProfit, inpTradeVolume);
