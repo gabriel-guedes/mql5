@@ -13,6 +13,7 @@ public:
    CMyUtils(void);
    ulong             StringToMagic(string pStringVar);
    bool              IsValidExpertName(string pExpertName);
+   double            AdjustToTick(double pValue);
 };
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
@@ -59,3 +60,14 @@ bool CMyUtils::IsValidExpertName(string pExpertName)
       return(true);
 }
 //+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CMyUtils::AdjustToTick(double pValue)
+{
+   double tickSize = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
+   //double tickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
+   double adjusted = (MathFloor(pValue / tickSize) * tickSize);
+   return(adjusted);
+};
+//+------------------------------------------------------------------+
+

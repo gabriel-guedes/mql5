@@ -15,11 +15,8 @@ class CMyPosition
 private:
    double            mEADayProfit;
    double            mEAOpenProfit;
-   double            mTickSize;
-   double            mTickValue;
-
 public:
-                     CMyPosition(void);
+                     //CMyPosition(void);
    void              CalcEADayProfit(string pSymbol, ulong pMagic);
    double            GetEADayProfit();
    void              CalcEAOpenProfit(string pSymbol, ulong pMagic);
@@ -32,14 +29,6 @@ public:
    bool              ModifySLTP(ulong pTicket, ulong pMagic, double pSL, double pTP, double pVolume);
 };
 
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-CMyPosition::CMyPosition(void)
-{
-   mTickSize = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
-   mTickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
-}
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -114,15 +103,6 @@ double CMyPosition::GetEAOpenProfit()
 double CMyPosition::BreakEven()
 {
    return(0);
-};
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyPosition::AdjustToTickSize(double pPoints)
-{
-   double lAdjusted = (MathFloor(pPoints / mTickSize) * mTickSize);
-   return(lAdjusted);
 };
 //+------------------------------------------------------------------+
 //|                                                                  |
