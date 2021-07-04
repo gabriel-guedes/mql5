@@ -13,14 +13,25 @@
 #include <zeroesq\MyPending.mqh>
 #include <zeroesq\MyUtils.mqh>
 
-input string   inpExpertName="MaxMinLong";
-input double   inpTradeVolume = 1.0;
+input string   inpExpertName="MaxMinLong";   //Expert Name
+input double   inpTradeVolume = 1.0;         //Volume
+input int      inpMAPeriod = 21;             //Moving Average Period
+input double   inpKeltnerMult = 1.0;         //Keltner Multiplier
 
+//+------------------------------------------------------------------+
+//| My Basic Objects                                                 |
+//+------------------------------------------------------------------+
 CMyPosition position;
 CMyTrade    trade;
 CMyBars     bars;
 CMyPending  pending;
 CMyUtils    utils;
+//+------------------------------------------------------------------+
+//| Indicator handles and buffers                                    |
+//+------------------------------------------------------------------+
+int keltnerHandle, atrHandle;
+double keltnerBuffer[], atrBuffer[];
+
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -33,6 +44,9 @@ int OnInit()
 
    ulong magic_number = utils.StringToMagic(inpExpertName);
    trade.SetMagicNumber(magic_number);
+   
+   atrHandle = iATR(_Symbol, PERIOD_CURRENT, 20);
+   keltnerHandle = iCustom(NULL, 0, "zeroesq\\MyKeltner", inpMAPeriod, inpKeltnerMult);
 
    return(INIT_SUCCEEDED);
 

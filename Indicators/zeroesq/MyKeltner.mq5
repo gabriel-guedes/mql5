@@ -128,8 +128,8 @@ int OnCalculate(const int rates_total,
       pos = 0;
 
 //--- main cycle
-   CopyBuffer(MA_handle, 0, 0, rates_total - prev_calculated + 1, EMABuffer);
-   CopyBuffer(ATR_handle, 0, 0, rates_total - prev_calculated + 1, ATRBuffer);
+   CopyBuffer(MA_handle, 0, 0, rates_total, EMABuffer);
+   CopyBuffer(ATR_handle, 0, 0, rates_total, ATRBuffer);
    for(int i = pos; i < rates_total && !IsStopped(); i++) {
       //--- upper line
       upperBuffer[i] = EMABuffer[i] + (ATRBuffer[i] * multiplierFactor);
