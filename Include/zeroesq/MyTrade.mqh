@@ -38,7 +38,6 @@ public:
    bool              SellLimit(string pSymbol, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
    bool              BuyStopLimit(string pSymbol, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
    bool              SellStopLimit(string pSymbol, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
-   //bool  ModifyPosition(string pSymbol,double pStop,double pProfit=0);
    bool              Close(string pSymbol, double pVolume = 0, string pComment = NULL);
    bool              RemoveOrder(ulong pTicket);
 };
@@ -227,24 +226,6 @@ bool CMyTrade::SellStopLimit(string pSymbol, double pVolume, double pPrice, doub
    bool success = OpenPending(pSymbol, ORDER_TYPE_SELL_STOP_LIMIT, pVolume, pPrice, pStop, pProfit, pPrice, pExpiration, pComment);
    return(success);
 }
-////+------------------------------------------------------------------+
-////| Modify Position                                                  |
-////+------------------------------------------------------------------+
-//bool CMyTrade::ModifyPosition(string pSymbol,double pStop,double pProfit=0)
-//  {
-//   MqlTradeRequest request={0};
-//
-//   request.action = TRADE_ACTION_SLTP;
-//   request.symbol = pSymbol;
-//   request.sl = pStop;
-//   request.tp = pProfit;
-//   request.magic=mMagic;
-//
-//   bool sendResult=SendAndCheckOrder(request);
-//
-//   return(sendResult);
-//
-//}
 //+------------------------------------------------------------------+
 //| Close Position                                                   |
 //+------------------------------------------------------------------+
@@ -312,67 +293,8 @@ bool CMyTrade::RemoveOrder(ulong pTicket)
    bool sendResult = SendAndCheckOrder(request);
 
    return(sendResult);
-
-
 }
-////+------------------------------------------------------------------+
-////| Delete Multiple pending orders                                   |
-////+------------------------------------------------------------------+
-//bool CMyTrade::DeleteMany(ulong &pTicket[])
-//{
-//   for(int i =0;i<ArraySize(pTicket);i++)
-//   {
-//      if(!DeleteOne(pTicket[i])) return(false);
-//   }
-//   return(true);
-//}
-////+------------------------------------------------------------------+
-////| Linear Grid Sell Limit                                           |
-////+------------------------------------------------------------------+
-//bool CMyTrade::LinearGridSell(double pPrice, double pVolume, int pLevels, double pPoints, string pComment)
-//{
-//   double priceLevel = pPrice;
-//
-//   for(int i=1; i<=pLevels; i++)
-//   {
-//      priceLevel = priceLevel + pPoints;
-//      if(!SellLimit(_Symbol,pVolume,priceLevel,0,0,0,pComment)) return(false);
-//   }
-//
-//   return(true);
-//}
-////+------------------------------------------------------------------+
-////| Linear Grid Buy Limit                                            |
-////+------------------------------------------------------------------+
-//bool CMyTrade::LinearGridBuy(double pPrice, double pVolume, int pLevels, double pPoints, string pComment)
-//{
-//   double priceLevel = pPrice;
-//
-//   for(int i=1; i<=pLevels; i++)
-//   {
-//      priceLevel = priceLevel - pPoints;
-//      if(!BuyLimit(_Symbol,pVolume,priceLevel,0,0,0,pComment)) return(false);
-//   }
-//
-//   return(true);
-//}
-////+------------------------------------------------------------------+
-////| Opposite Orders                                                   |
-////+------------------------------------------------------------------+
-//bool CMyTrade::OppositeOrder(string pSymbol,ENUM_ORDER_TYPE pType,double pVolume,double pPrice,string pComment)
-//{
-//   if(pType==ORDER_TYPE_BUY||pType==ORDER_TYPE_BUY_LIMIT||pType==ORDER_TYPE_BUY_STOP||pType==ORDER_TYPE_BUY_STOP_LIMIT)
-//   {
-//      return SellLimit(pSymbol,pVolume,pPrice,0,0,0,pComment);
-//   }
-//
-//   if(pType==ORDER_TYPE_SELL||pType==ORDER_TYPE_SELL_LIMIT||pType==ORDER_TYPE_SELL_STOP||pType==ORDER_TYPE_SELL_STOP_LIMIT)
-//   {
-//      return BuyLimit(pSymbol,pVolume,pPrice,0,0,0,pComment);
-//   }
-//
-//   return(false);
-//}
+
 //+------------------------------------------------------------------+
 //| Get order type description                                       |
 //+------------------------------------------------------------------+
