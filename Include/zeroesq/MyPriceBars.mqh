@@ -15,11 +15,12 @@ class CMyBars
 protected:
    MqlRates          mBars[];
    double            mClosedHighs[], mClosedLows[];
-   datetime          mLastBarTime; //mTime[], 
+   datetime          mLastBarTime;
    int               mDayBarCount;
 public:
                      CMyBars(void);
    void              SetBars(int pBarsCount);
+   MqlRates          GetOneBar(int pShift);
    double            GetClose(int pShift);
    double            GetHigh(int pShift);
    double            GetLow(int pShift);
@@ -59,6 +60,14 @@ void CMyBars::SetBars(int pBarsCount)
       CopyLow(_Symbol, PERIOD_CURRENT, 1, pBarsCount, mClosedLows);
    }
 }
+//+------------------------------------------------------------------+
+//| Get Bar                                                          |
+//+------------------------------------------------------------------+
+MqlRates CMyBars::GetOneBar(int pShift)
+{
+   return mBars[pShift];
+}
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
