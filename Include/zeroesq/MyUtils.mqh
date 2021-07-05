@@ -14,6 +14,7 @@ public:
    ulong             StringToMagic(string pStringVar);
    bool              IsValidExpertName(string pExpertName);
    double            AdjustToTick(double pValue);
+   double            GetAsk();
 };
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
@@ -66,8 +67,17 @@ double CMyUtils::AdjustToTick(double pValue)
 {
    double tickSize = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
    //double tickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
-   double adjusted = (MathFloor(pValue / tickSize) * tickSize);
+   double adjusted = NormalizeDouble((MathFloor(pValue / tickSize) * tickSize), _Digits);
    return(adjusted);
 };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CMyUtils::GetAsk(void)
+{
+   MqlTick tick = {};
+   
+   return(SymbolInfoDouble(_Symbol, SYMBOL_ASK));
+}
 //+------------------------------------------------------------------+
 
