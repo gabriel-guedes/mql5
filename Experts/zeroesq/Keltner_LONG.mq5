@@ -77,6 +77,7 @@ void OnTick()
    ulong positionTicket = position.SelectPositionByMagic(trade.GetMagic());
 
    if(positionTicket != NULL) {
+      //--- modify position
       //double takeProfit = bars.GetLowestHigh();
       //position.ModifySLTP(positionTicket, trade.GetMagic(), 0, takeProfit, inpTradeVolume);
 
@@ -90,19 +91,19 @@ void OnTick()
       CopyBuffer(keltnerUpperHandle, 1, 0, barsCount, keltnerLowerBuffer);
       CopyBuffer(atrHandle, 0, 0, barsCount, atrBuffer);
       
-      double previousUpperBand = keltnerUpperBuffer[1];
-      double previousLowerBand = keltnerLowerBuffer[1];
-      double previousAtr       = utils.AdjustToTick(atrBuffer[1]);      
-      double previousClose     = bars.GetClose(1);
-      double previousLow       = bars.GetLow(1);
-      
-      double entryPrice        = previousLow - previousAtr;
-      double sl                = entryPrice - previousAtr;
-      double tp                = entryPrice + previousAtr;
+      double upperBand = keltnerUpperBuffer[1];
+      double lowerBand = keltnerLowerBuffer[1];
+      double atr = atrBuffer[1];
+      MqlRates bar = bars.GetOneBar(1);
+            
+      double entry = utils.GetAsk();
+      double sl = utils.AdjustToTick(entry - atr);
+      double tp = utils.AdjustToTick(entry + atr);
       
       //--- place order
-      if(previousUpperBand > previousClose && previousClose > previousLowerBand) {
-         trade.BuyLimit(_Symbol, inpTradeVolume, entryPrice, sl, tp);
+      if(bar.close > lowerBand && bar.close < upperBand && bar.open < lowerBand) {
+         trade.BuyMarket(_Symbol, inpTradeVolume, sl, tp);
+         //trade.BuyLimit(_Symbol, inpTradeVolume, entryPrice, sl, tp);
       }
 
    }
