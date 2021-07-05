@@ -30,9 +30,6 @@
 //+------------------------------------------------------------------+
 input int      inpMAPeriod    = 21;             // MA Period
 input double   inpMultiplier  = 1;              // Channel multiplicator
-//input ENUM_MA_METHOD       inpMAMode      = MODE_EMA;       // MA Mode
-//input ENUM_APPLIED_PRICE   inpPriceType   = PRICE_TYPICAL;  // Price Type
-
 //+------------------------------------------------------------------+
 //| Global variables                                                 |
 //+------------------------------------------------------------------+

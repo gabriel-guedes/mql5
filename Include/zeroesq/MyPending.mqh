@@ -48,7 +48,7 @@ class CMyPending
     int TotalPending(string pSymbol);
     void GetTickets(string pSymbol, ulong &pTickets[]);
     void GetTicketsByMagic(ulong &pTickets[]);
-    bool CancelOrdersByMagic(ulong pMagic);
+    bool CancelAllByMagic(ulong pMagic);
     bool IsPending(ulong pTicket);
     bool DeleteOrder(ulong pTicket, ulong pMagic);
 };
@@ -126,7 +126,7 @@ bool CMyPending::SetPendingByMagic(ulong pMagic)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool CMyPending::CancelOrdersByMagic(ulong pMagic)
+bool CMyPending::CancelAllByMagic(ulong pMagic)
 {
    bool ordersCanceled = true;
    

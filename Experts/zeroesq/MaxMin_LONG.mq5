@@ -29,8 +29,7 @@ CMyUtils    utils;
 //+------------------------------------------------------------------+
 //| Indicator handles and buffers                                    |
 //+------------------------------------------------------------------+
-int keltnerHandle, atrHandle;
-double keltnerBuffer[], atrBuffer[];
+
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -44,9 +43,6 @@ int OnInit()
 
    ulong magic_number = utils.StringToMagic(inpExpertName);
    trade.SetMagicNumber(magic_number);
-   
-   atrHandle = iATR(_Symbol, PERIOD_CURRENT, 20);
-   keltnerHandle = iCustom(NULL, 0, "zeroesq\\MyKeltner", inpMAPeriod, inpKeltnerMult);
 
    return(INIT_SUCCEEDED);
 
@@ -80,7 +76,7 @@ void OnTick()
       double highestHigh = bars.GetHighestHigh();
       double currentOpen = bars.GetOpen(0);
       if(currentOpen > previousLow) {
-         pending.CancelOrdersByMagic(trade.GetMagic());
+         pending.CancelAllByMagic(trade.GetMagic());
          trade.BuyLimit(_Symbol, inpTradeVolume, previousLow, 0, highestHigh);
       }
 

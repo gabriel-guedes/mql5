@@ -15,7 +15,7 @@ class CMyBars
 protected:
    MqlRates          mBars[];
    double            mClosedHighs[], mClosedLows[];
-   datetime          mTime[], mLastTime;
+   datetime          mLastBarTime; //mTime[], 
    int               mDayBarCount;
 public:
                      CMyBars(void);
@@ -42,9 +42,10 @@ public:
 CMyBars::CMyBars(void)
 {
    ArraySetAsSeries(mBars, true);
-   ArraySetAsSeries(mTime, true);
    ArraySetAsSeries(mClosedHighs, true);
    ArraySetAsSeries(mClosedLows, true);
+   
+   mLastBarTime = 0;
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -167,24 +168,25 @@ double CMyBars::GetLowestHigh()
 //+------------------------------------------------------------------+
 bool CMyBars::IsNewBar()
 {
-   bool lFirstRun = false, lNewBar = false;
+   bool firstRun = false, newBar = false;
+   datetime openingTimes[];
+   ArraySetAsSeries(openingTimes, true);
 
-   CopyTime(_Symbol, PERIOD_CURRENT, 0, 2, mTime);
+   CopyTime(_Symbol, PERIOD_CURRENT, 0, 1, openingTimes);
+   
+   if(mLastBarTime == 0)
+      firstRun = true;
 
-   if(mLastTime == 0) {
-      lFirstRun = true;
-   }
-
-   if(mTime[0] > mLastTime) {
-      if(lFirstRun == false) {
-         lNewBar = true;
+   if(openingTimes[0] > mLastBarTime) {
+      if(firstRun == false) {
+         newBar = true;
       }
 
-      mLastTime = mTime[0];
+      mLastBarTime = openingTimes[0];
 
    }
 
-   return(lNewBar);
+   return(newBar);
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
