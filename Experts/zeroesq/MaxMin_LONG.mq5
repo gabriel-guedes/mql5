@@ -61,7 +61,7 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
 {
-   bars.SetBars(3);
+   bars.SetInfo(3);
 
    if(!bars.IsNewBar()) return;
 
@@ -72,12 +72,12 @@ void OnTick()
       position.ModifySLTP(positionTicket, trade.GetMagic(), 0, takeProfit, inpTradeVolume);
 
    } else {
-      double previousLow = bars.GetLow(1);
+      MqlRates previous = bars.GetOne(1);
+      MqlRates current = bars.GetOne(0);
       double highestHigh = bars.GetHighestHigh();
-      double currentOpen = bars.GetOpen(0);
-      if(currentOpen > previousLow) {
+      if(current.open > previous.low) {
          pending.CancelAllByMagic(trade.GetMagic());
-         trade.BuyLimit(_Symbol, inpTradeVolume, previousLow, 0, highestHigh);
+         trade.BuyLimit(_Symbol, inpTradeVolume, previous.low, 0, highestHigh);
       }
 
    }

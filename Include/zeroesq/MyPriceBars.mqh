@@ -19,16 +19,8 @@ protected:
    int               mDayBarCount;
 public:
                      CMyBars(void);
-   void              SetBars(int pBarsCount);
-   MqlRates          GetOneBar(int pShift);
-   double            GetClose(int pShift);
-   double            GetHigh(int pShift);
-   double            GetLow(int pShift);
-   double            GetOpen(int pShift);
-   datetime          GetTime(int pShift);
-   long              GetTickVolume(int pShift);
-   long              GetVolume(int pShift);
-   double            GetVolumeAvg(int pPeriod);
+   void              SetInfo(int pBarsCount);
+   MqlRates          GetOne(int pShift);
    double            GetBarSize(int pShift);
    double            GetHighestHigh();
    double            GetLowestLow();
@@ -51,7 +43,7 @@ CMyBars::CMyBars(void)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-void CMyBars::SetBars(int pBarsCount)
+void CMyBars::SetInfo(int pBarsCount)
 {
    CopyRates(_Symbol, PERIOD_CURRENT, 0, pBarsCount, mBars);
    
@@ -63,74 +55,11 @@ void CMyBars::SetBars(int pBarsCount)
 //+------------------------------------------------------------------+
 //| Get Bar                                                          |
 //+------------------------------------------------------------------+
-MqlRates CMyBars::GetOneBar(int pShift)
+MqlRates CMyBars::GetOne(int pShift)
 {
    return mBars[pShift];
 }
 
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyBars::GetClose(int pShift)
-{
-   return(mBars[pShift].close);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyBars::GetHigh(int pShift)
-{
-   return(mBars[pShift].high);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyBars::GetLow(int pShift)
-{
-   return(mBars[pShift].low);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyBars::GetOpen(int pShift)
-{
-   return(mBars[pShift].open);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-datetime CMyBars::GetTime(int pShift)
-{
-   return(mBars[pShift].time);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-long CMyBars::GetTickVolume(int pShift)
-{
-   return(mBars[pShift].tick_volume);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-long CMyBars::GetVolume(int pShift)
-{
-   return(mBars[pShift].real_volume);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyBars::GetVolumeAvg(int pPeriod)
-{
-//Calculate Volume Average
-   double avg = 0;
-   for(int x = 1; x <= pPeriod; x++) {
-      avg = avg + mBars[x].real_volume;
-   }
-   avg = avg / pPeriod;
-   NormalizeDouble(avg, _Digits);
-   return(avg);
-}
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+

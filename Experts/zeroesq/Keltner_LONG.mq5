@@ -70,7 +70,7 @@ void OnDeinit(const int reason)
 void OnTick()
 {
    int barsCount = 5;
-   bars.SetBars(barsCount);
+   bars.SetInfo(barsCount);
 
    if(!bars.IsNewBar()) return;
 
@@ -94,7 +94,7 @@ void OnTick()
       double upperBand = keltnerUpperBuffer[1];
       double lowerBand = keltnerLowerBuffer[1];
       double atr = atrBuffer[1];
-      MqlRates bar = bars.GetOneBar(1);
+      MqlRates bar = bars.GetOne(1);
             
       double entry = utils.GetAsk();
       double sl = utils.AdjustToTick(entry - atr);
