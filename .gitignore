@@ -30,6 +30,7 @@ Indicators/Market/
 Logs/
 Presets/
 Profiles/
-Scripts/
+Scripts/Examples/
+Scripts/UnitTests/
 experts.dat
 *.ex5
