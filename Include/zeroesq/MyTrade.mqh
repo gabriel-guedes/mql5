@@ -5,7 +5,6 @@
 //+------------------------------------------------------------------+
 #property copyright "Gabriel Guedes de Sena"
 #property link      "twitter.com/gabriel_guedes"
-
 #include <zeroesq\errordescription.mqh>
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -26,7 +25,8 @@ private:
 
 public:
                      CMyTrade(void);
-   void              SetMagicNumber(ulong pMagic);
+   bool              SetMagicNumber(ulong pMagic);
+   void              ReleaseMagicNumber();
    void              SetDeviation(ulong pDeviation);
    void              SetFillType(ENUM_ORDER_TYPE_FILLING pFilltype);
    ulong             GetMagic();
@@ -52,10 +52,29 @@ void CMyTrade::CMyTrade(void)
 //+------------------------------------------------------------------+
 //| SetMagicNumber                                                   |
 //+------------------------------------------------------------------+
-void CMyTrade::SetMagicNumber(ulong pMagic)
+bool CMyTrade::SetMagicNumber(ulong pMagic)
 {
-   mMagic = pMagic;
+   if(!GlobalVariableCheck((string)pMagic)) {
+      PrintFormat("Registering %u magic number", pMagic);
+      mMagic = pMagic;
+      GlobalVariableSet((string)pMagic, 0.00);
+      return(true);
+   }
+   
+   else {
+      PrintFormat("ERROR - EA Magic Number already in use");
+      return(false);
+   }
+
 }
+//+------------------------------------------------------------------+
+//| Release Magic Number                                             |
+//+------------------------------------------------------------------+
+void CMyTrade::ReleaseMagicNumber(void)
+{
+   GlobalVariableDel((string)mMagic);
+}
+
 //+------------------------------------------------------------------+
 //| Set Deviation                                                    |
 //+------------------------------------------------------------------+

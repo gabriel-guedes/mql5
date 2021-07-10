@@ -37,12 +37,12 @@ CMyUtils    utils;
 int OnInit()
 {
    if(!utils.IsValidExpertName(inpExpertName)) {
-      Print("ERROR - Init Failed - Null/Empty Expert name.");
       return(INIT_FAILED);
    }
 
    ulong magic_number = utils.StringToMagic(inpExpertName);
-   trade.SetMagicNumber(magic_number);
+   if (!trade.SetMagicNumber(magic_number))
+      return(INIT_FAILED);
 
    return(INIT_SUCCEEDED);
 
@@ -54,6 +54,8 @@ void OnDeinit(const int reason)
 {
 //--- destroy timer
    EventKillTimer();
+   
+   trade.ReleaseMagicNumber();
 
 }
 //+------------------------------------------------------------------+
@@ -107,16 +109,4 @@ void OnTradeTransaction(const MqlTradeTransaction& trans,
 {
 
 }
-//+------------------------------------------------------------------+
-//| ChartEvent function                                              |
-//+------------------------------------------------------------------+
-void OnChartEvent(const int id,
-                  const long &lparam,
-                  const double &dparam,
-                  const string &sparam)
-{
-//---
 
-}
-//+------------------------------------------------------------------+
-//+------------------------------------------------------------------+

@@ -55,10 +55,15 @@ bool CMyUtils::IsValidExpertName(string pExpertName)
    StringTrimLeft(name);
    StringTrimRight(name);
    
-   if(name == NULL || name == "")
+   if(name == NULL || name == "") {
+      Print("ERROR - Null/Empty Expert name.");
       return(false);
-   else
+   }
+      
+   else {
+      Print("OK - EA name is valid to be converted to a magic number.");      
       return(true);
+   }
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
