@@ -12,8 +12,9 @@
 #include <zeroesq\MyPriceBars.mqh>
 #include <zeroesq\MyPending.mqh>
 #include <zeroesq\MyUtils.mqh>
+#include <zeroesq\MyReport.mqh>
 
-input string   inpExpertName="MaxMinLong";   //Expert Name
+input string   inpExpertName = "MaxMinLong"; //Expert Name
 input double   inpTradeVolume = 1.0;         //Volume
 input int      inpMAPeriod = 21;             //Moving Average Period
 input double   inpKeltnerMult = 1.0;         //Keltner Multiplier
@@ -26,6 +27,7 @@ CMyTrade    trade;
 CMyBars     bars;
 CMyPending  pending;
 CMyUtils    utils;
+CMyReport   report;
 //+------------------------------------------------------------------+
 //| Indicator handles and buffers                                    |
 //+------------------------------------------------------------------+
@@ -54,7 +56,7 @@ void OnDeinit(const int reason)
 {
 //--- destroy timer
    EventKillTimer();
-   
+
    trade.ReleaseMagicNumber();
 
 }
@@ -110,3 +112,16 @@ void OnTradeTransaction(const MqlTradeTransaction& trans,
 
 }
 
+//+------------------------------------------------------------------+
+//| OnTester Function                                                |
+//+------------------------------------------------------------------+
+double OnTester()
+{
+   double ret=0.0;
+   
+   report.SetDeals(trade.GetMagic(), 0, TimeCurrent());
+   report.SaveFile();
+   
+   return(ret);
+}
+//+------------------------------------------------------------------+
