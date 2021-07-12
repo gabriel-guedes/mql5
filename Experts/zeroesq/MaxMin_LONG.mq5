@@ -12,8 +12,9 @@
 #include <zeroesq\MyPriceBars.mqh>
 #include <zeroesq\MyPending.mqh>
 #include <zeroesq\MyUtils.mqh>
+#include <zeroesq\MyReport.mqh>
 
-input string   inpExpertName="MaxMinLong";   //Expert Name
+input string   inpExpertName = "MaxMinLong"; //Expert Name
 input double   inpTradeVolume = 1.0;         //Volume
 input int      inpMAPeriod = 21;             //Moving Average Period
 input double   inpKeltnerMult = 1.0;         //Keltner Multiplier
@@ -26,6 +27,7 @@ CMyTrade    trade;
 CMyBars     bars;
 CMyPending  pending;
 CMyUtils    utils;
+CMyReport   report;
 //+------------------------------------------------------------------+
 //| Indicator handles and buffers                                    |
 //+------------------------------------------------------------------+
@@ -37,12 +39,12 @@ CMyUtils    utils;
 int OnInit()
 {
    if(!utils.IsValidExpertName(inpExpertName)) {
-      Print("ERROR - Init Failed - Null/Empty Expert name.");
       return(INIT_FAILED);
    }
 
    ulong magic_number = utils.StringToMagic(inpExpertName);
-   trade.SetMagicNumber(magic_number);
+   if (!trade.SetMagicNumber(magic_number))
+      return(INIT_FAILED);
 
    return(INIT_SUCCEEDED);
 
@@ -54,6 +56,8 @@ void OnDeinit(const int reason)
 {
 //--- destroy timer
    EventKillTimer();
+
+   trade.ReleaseMagicNumber();
 
 }
 //+------------------------------------------------------------------+
@@ -107,16 +111,17 @@ void OnTradeTransaction(const MqlTradeTransaction& trans,
 {
 
 }
-//+------------------------------------------------------------------+
-//| ChartEvent function                                              |
-//+------------------------------------------------------------------+
-void OnChartEvent(const int id,
-                  const long &lparam,
-                  const double &dparam,
-                  const string &sparam)
-{
-//---
 
-}
 //+------------------------------------------------------------------+
+//| OnTester Function                                                |
+//+------------------------------------------------------------------+
+double OnTester()
+{
+   double ret=0.0;
+   
+   report.SetDeals(trade.GetMagic(), 0, TimeCurrent());
+   report.SaveFile();
+   
+   return(ret);
+}
 //+------------------------------------------------------------------+
