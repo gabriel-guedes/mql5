@@ -38,6 +38,8 @@ CMyReport   report;
 //+------------------------------------------------------------------+
 int OnInit()
 {
+   report.SetStartTime();
+   
    if(!utils.IsValidExpertName(inpExpertName)) {
       return(INIT_FAILED);
    }
@@ -117,11 +119,11 @@ void OnTradeTransaction(const MqlTradeTransaction& trans,
 //+------------------------------------------------------------------+
 double OnTester()
 {
-   double ret=0.0;
-   
+   double ret = 0.0;
+   report.SetEndTime();
    report.SetDeals(trade.GetMagic(), 0, TimeCurrent());
-   report.SaveFile();
-   
+   report.SaveDealsToCSV();
+
    return(ret);
 }
 //+------------------------------------------------------------------+
