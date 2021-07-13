@@ -16,7 +16,7 @@ protected:
    MqlRates          mBars[];
    double            mClosedHighs[], mClosedLows[];
    datetime          mLastBarTime;
-   int               mDayBarCount;
+   uint              mDayBarCount;
 public:
                      CMyBars(void);
    void              SetInfo(int pBarsCount);
@@ -142,3 +142,4 @@ int CMyBars::GetDayBarCount(string pSymbol, ENUM_TIMEFRAMES pTimeframe)
    return(Bars(pSymbol, pTimeframe, lStart, lStop));
 }
 //+------------------------------------------------------------------+
+
