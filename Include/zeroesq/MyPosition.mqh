@@ -15,8 +15,9 @@ class CMyPosition
 private:
    double            mEADayProfit;
    double            mEAOpenProfit;
+   uint              mBarsDuration;
 public:
-                     //CMyPosition(void);
+                     CMyPosition(void);
    void              CalcEADayProfit(string pSymbol, ulong pMagic);
    double            GetEADayProfit();
    void              CalcEAOpenProfit(string pSymbol, ulong pMagic);
@@ -27,8 +28,17 @@ public:
    double            AdjustToTickSize(double pPoints);
    ulong             SelectPositionByMagic(ulong pMagic);
    bool              ModifySLTP(ulong pTicket, ulong pMagic, double pSL, double pTP, double pVolume);
+   void              AddBarsDuration();   
+   void              ResetBarsDuration();
+   uint              GetBarsDuration();   
 };
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void CMyPosition::CMyPosition(void)
+{
+   ResetBarsDuration();
+}
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -144,5 +154,26 @@ bool CMyPosition::ModifySLTP(ulong pTicket, ulong pMagic, double pSL, double pTP
    request.volume = pVolume;
 
    return(OrderSend(request, result));
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void CMyPosition::AddBarsDuration(void)
+{
+   mBarsDuration++;
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void CMyPosition::ResetBarsDuration(void)
+{
+   mBarsDuration = 0;
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+uint CMyPosition::GetBarsDuration(void)
+{
+   return(mBarsDuration);
 }
 //+------------------------------------------------------------------+
