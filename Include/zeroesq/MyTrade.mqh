@@ -55,7 +55,7 @@ void CMyTrade::CMyTrade(void)
 bool CMyTrade::SetMagicNumber(ulong pMagic)
 {
    if(!GlobalVariableCheck((string)pMagic)) {
-      PrintFormat("Registering %u magic number", pMagic);
+      PrintFormat("INFO - Registering %u magic number", pMagic);
       mMagic = pMagic;
       GlobalVariableSet((string)pMagic, 0.00);
       return(true);
