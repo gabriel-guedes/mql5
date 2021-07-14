@@ -26,7 +26,7 @@ public:
    double            BreakEven();
    double            CashToPoints();
    double            AdjustToTickSize(double pPoints);
-   ulong             SelectPositionByMagic(ulong pMagic);
+   ulong             GetTicketByMagic(ulong pMagic);
    bool              ModifySLTP(ulong pTicket, ulong pMagic, double pSL, double pTP, double pVolume);
    void              UpdateBarsDuration();   
    void              ResetBarsDuration();
@@ -124,7 +124,7 @@ double CMyPosition::GetEATotalProfit(void)
 //+------------------------------------------------------------------+
 //| Get First Position by magic number                               |
 //+------------------------------------------------------------------+
-ulong CMyPosition::SelectPositionByMagic(ulong pMagic)
+ulong CMyPosition::GetTicketByMagic(ulong pMagic)
 {
    uint total = PositionsTotal();
 

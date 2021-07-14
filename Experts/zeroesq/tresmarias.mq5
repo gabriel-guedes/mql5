@@ -28,7 +28,8 @@ CMyReport   report;
 //+------------------------------------------------------------------+
 //| Indicator handles and buffers                                    |
 //+------------------------------------------------------------------+
-
+int atrHandle = INVALID_HANDLE;
+double atr[];
 //+------------------------------------------------------------------+
 //| Global Variables                                                 |
 //+------------------------------------------------------------------+
@@ -42,6 +43,9 @@ int OnInit()
 {
    report.SetStartTime();
    
+   atrHandle = iATR(_Symbol, PERIOD_CURRENT, 20);
+   ArraySetAsSeries(atr, true);
+    
    if(!utils.IsValidExpertName(inpExpertName)) {
       return(INIT_FAILED);
    }
@@ -75,7 +79,7 @@ void OnTick()
 
    bool isNewBar = bars.IsNewBar();
 
-   ulong positionTicket = position.SelectPositionByMagic(trade.GetMagic());
+   ulong positionTicket = position.GetTicketByMagic(trade.GetMagic());
 
    if(positionTicket != NULL) {
       if(isNewBar)
@@ -90,6 +94,8 @@ void OnTick()
       MqlRates bar1 = bars.GetOne(1);
            
       if(bar1.low > bar2.low && bar2.low > bar3.low) {
+         CopyBuffer(atrHandle, 0, 0, 2, atr);
+         double trueRange = atr[1];
          pending.CancelAllByMagic(trade.GetMagic());
          double sl = bar3.low;
          double tp = bar1.high + (bar1.close - bar3.low);
