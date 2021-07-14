@@ -80,7 +80,7 @@ void OnTick()
    if(positionTicket != NULL) {
       position.AddBarsDuration();
       if(position.GetBarsDuration() > 5)
-         trade.Close(_Symbol);
+         trade.Close();
       //double takeProfit = bars.GetLowestHigh();
       //position.ModifySLTP(positionTicket, trade.GetMagic(), 0, takeProfit, volume);
 
@@ -93,7 +93,7 @@ void OnTick()
          pending.CancelAllByMagic(trade.GetMagic());
          double sl = bar3.low;
          double tp = bar1.high + (bar1.close - bar3.low);
-         bool trade_ok = trade.BuyMarket(_Symbol, volume, sl, tp);
+         bool trade_ok = trade.BuyMarket(volume, sl, tp);
          if(trade_ok)
             position.ResetBarsDuration();
       }
