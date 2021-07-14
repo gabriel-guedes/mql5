@@ -85,7 +85,8 @@ void OnTick()
       if(isNewBar)
          position.UpdateBarsDuration();
       
-      if(position.GetBarsDuration() > 5)
+      uint duration = position.GetBarsDuration();
+      if(duration > 5)
          trade.Close();
 
    } else {
@@ -96,9 +97,10 @@ void OnTick()
       if(bar1.low > bar2.low && bar2.low > bar3.low) {
          CopyBuffer(atrHandle, 0, 0, 2, atr);
          double trueRange = atr[1];
-         pending.CancelAllByMagic(trade.GetMagic());
          double sl = bar3.low;
          double tp = bar1.high + (bar1.close - bar3.low);
+         
+         pending.CancelAllByMagic(trade.GetMagic());
          bool trade_ok = trade.BuyMarket(volume, sl, tp);
          if(trade_ok)
             position.ResetBarsDuration();
