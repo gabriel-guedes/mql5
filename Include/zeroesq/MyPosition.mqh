@@ -28,7 +28,7 @@ public:
    double            AdjustToTickSize(double pPoints);
    ulong             SelectPositionByMagic(ulong pMagic);
    bool              ModifySLTP(ulong pTicket, ulong pMagic, double pSL, double pTP, double pVolume);
-   void              AddBarsDuration();   
+   void              UpdateBarsDuration();   
    void              ResetBarsDuration();
    uint              GetBarsDuration();   
 };
@@ -158,7 +158,7 @@ bool CMyPosition::ModifySLTP(ulong pTicket, ulong pMagic, double pSL, double pTP
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-void CMyPosition::AddBarsDuration(void)
+void CMyPosition::UpdateBarsDuration(void)
 {
    mBarsDuration++;
 }
