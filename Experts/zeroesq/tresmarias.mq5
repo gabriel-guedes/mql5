@@ -14,7 +14,7 @@
 #include <zeroesq\MyUtils.mqh>
 #include <zeroesq\MyReport.mqh>
 
-input string   inpExpertName = "Debugable";  //Expert Name
+input string   inpExpertName = "tres marias";  //Expert Name
 
 //+------------------------------------------------------------------+
 //| My Basic Objects                                                 |
@@ -73,16 +73,16 @@ void OnTick()
 {
    bars.SetInfo(4);
 
-   if(!bars.IsNewBar()) return;
+   bool isNewBar = bars.IsNewBar();
 
    ulong positionTicket = position.SelectPositionByMagic(trade.GetMagic());
 
    if(positionTicket != NULL) {
-      position.AddBarsDuration();
+      if(isNewBar)
+         position.UpdateBarsDuration();
+      
       if(position.GetBarsDuration() > 5)
          trade.Close();
-      //double takeProfit = bars.GetLowestHigh();
-      //position.ModifySLTP(positionTicket, trade.GetMagic(), 0, takeProfit, volume);
 
    } else {
       MqlRates bar3 = bars.GetOne(3);
