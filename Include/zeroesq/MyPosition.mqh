@@ -19,25 +19,20 @@ private:
    long     mType;
    ulong    mTicket;
    double   mVolume;
+   long     mTime;
+   datetime mLastBarTime;
+   void     UpdateBarsDuration(datetime pTime);
+   void     ResetBarsDuration();
+   void     ResetInfo();
 public:
    CMyPosition(void);
-   bool              UpdateInfo(ulong pMagic);
+   bool              UpdateInfo(ulong pMagic, datetime pCurrentBarTime);
    bool              IsOpen();
    long              GetType();
    ulong             GetTicket();
    double            GetVolume();
-   void              CalcEADayProfit(string pSymbol, ulong pMagic);
-   double            GetEADayProfit();
-   void              CalcEAOpenProfit(string pSymbol, ulong pMagic);
-   double            GetEAOpenProfit();
-   double            GetEATotalProfit();
-   double            BreakEven();
-   double            CashToPoints();
-   double            AdjustToTickSize(double pPoints);
    ulong             GetTicketByMagic(ulong pMagic);
    bool              ModifySLTP(ulong pTicket, ulong pMagic, double pSL, double pTP, double pVolume);
-   void              UpdateBarsDuration();
-   void              ResetBarsDuration();
    uint              GetBarsDuration();
 };
 //+------------------------------------------------------------------+
@@ -45,31 +40,65 @@ public:
 //+------------------------------------------------------------------+
 void CMyPosition::CMyPosition(void)
 {
-   ResetBarsDuration();
+   ResetInfo();
 }
 //+------------------------------------------------------------------+
 //| Update Position Info                               |
 //+------------------------------------------------------------------+
-bool CMyPosition::UpdateInfo(ulong pMagic)
+bool CMyPosition::UpdateInfo(ulong pMagic, datetime pCurrentBarTime)
 {
    uint total = PositionsTotal();
-
-   mTicket = NULL;
-   mType = -1;
-   mVolume = 0.00;
 
    for(uint i = 0; i < total; i++) {
       string positionSymbol = PositionGetSymbol(i);
       ulong magic = PositionGetInteger(POSITION_MAGIC);
+      long typeLastChecked = PositionGetInteger(POSITION_TYPE);
       if(magic == pMagic && positionSymbol == _Symbol) {
          mTicket = PositionGetTicket(i);
-         mType = PositionGetInteger(POSITION_TYPE);
+         //mType = PositionGetInteger(POSITION_TYPE);
          mVolume = PositionGetDouble(POSITION_VOLUME);
+         mTime = PositionGetInteger(POSITION_TIME);
+         
+         if(mType != typeLastChecked) //---position reversal
+            ResetBarsDuration();
+         mType = typeLastChecked;
+
+         if(pCurrentBarTime > mLastBarTime && pCurrentBarTime > mTime)
+            UpdateBarsDuration(pCurrentBarTime);
          return(true);
       }
    }
 
+   ResetInfo();
    return(false);
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void CMyPosition::ResetInfo(void)
+{
+   mTicket = NULL;
+   mType = -1;
+   mVolume = 0.00;
+   mTime = 0;
+   mBarsDuration = 0;
+   mLastBarTime = 0;
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void CMyPosition::ResetBarsDuration(void)
+{
+   mBarsDuration = 0;
+   mLastBarTime = 0;
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void CMyPosition::UpdateBarsDuration(datetime pTime)
+{
+   mBarsDuration++;
+   mLastBarTime = pTime;
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -81,40 +110,6 @@ bool CMyPosition::IsOpen(void)
    else
       return(false);
 }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-void CMyPosition::CalcEADayProfit(string pSymbol, ulong pMagic)
-{
-   MqlDateTime from_date, to_date;
-   TimeCurrent(from_date);
-   from_date.hour = 0;
-   from_date.min = 0;
-   from_date.sec = 0;
-   TimeCurrent(to_date);
-   to_date.hour = 23;
-   to_date.min = 59;
-   to_date.sec = 59;
-
-   datetime begin = StructToTime(from_date);
-   datetime end = StructToTime(to_date);
-
-   HistorySelect(begin, end);
-
-   uint dealsTotal = HistoryDealsTotal();
-   mEADayProfit = 0;
-
-   for(uint i = 0; i < dealsTotal; i++) {
-      ulong ticket = HistoryDealGetTicket(i);
-      ulong dealType = HistoryDealGetInteger(ticket, DEAL_TYPE);
-      ulong dealMagic = HistoryDealGetInteger(ticket, DEAL_MAGIC);
-      string dealSymbol = HistoryDealGetString(ticket, DEAL_SYMBOL);
-
-      if(dealType != DEAL_TYPE_BALANCE && dealMagic == pMagic && dealSymbol == pSymbol)
-         mEADayProfit = mEADayProfit + (HistoryDealGetDouble(ticket, DEAL_PROFIT));
-   }
-
-};
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -135,54 +130,6 @@ ulong CMyPosition::GetTicket(void)
 double CMyPosition::GetVolume(void)
 {
    return(mVolume);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyPosition::GetEADayProfit()
-{
-   return(mEADayProfit);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-void CMyPosition::CalcEAOpenProfit(string pSymbol, ulong pMagic)
-{
-
-   mEAOpenProfit = 0;
-
-   long total = PositionsTotal();
-
-   for(int i = 0; i < total; i++) {
-      PositionSelectByTicket(i);
-      ulong positionTicket = PositionGetTicket(i);
-      ulong positionMagic = PositionGetInteger(POSITION_MAGIC);
-      string positionSymbol = PositionGetString(POSITION_SYMBOL);
-
-      if(positionSymbol == pSymbol && positionMagic == pMagic)
-         mEAOpenProfit = mEAOpenProfit + PositionGetDouble(POSITION_PROFIT);
-   }
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyPosition::GetEAOpenProfit()
-{
-   return(mEAOpenProfit);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyPosition::BreakEven()
-{
-   return(0);
-};
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyPosition::GetEATotalProfit(void)
-{
-   return(mEAOpenProfit + mEADayProfit);
 }
 //+------------------------------------------------------------------+
 //| Get First Position by magic number                               |
@@ -217,20 +164,6 @@ bool CMyPosition::ModifySLTP(ulong pTicket, ulong pMagic, double pSL, double pTP
    request.volume = pVolume;
 
    return(OrderSend(request, result));
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-void CMyPosition::UpdateBarsDuration(void)
-{
-   mBarsDuration++;
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-void CMyPosition::ResetBarsDuration(void)
-{
-   mBarsDuration = 0;
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
