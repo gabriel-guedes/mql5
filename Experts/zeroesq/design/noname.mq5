@@ -80,10 +80,11 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
 {
-   bars.SetInfo(3);
-   position.UpdateInfo(trade.GetMagic());
+   bars.SetInfo(10);
+   position.UpdateInfo(trade.GetMagic(), bars.GetOne(0).time);
 
-   bool isNewBar = bars.IsNewBar();
+   if(bars.IsNewBar())
+      Print(position.GetBarsDuration());
 
    bool goLong = false, goShort = false;
    double lastClose = bars.GetOne(1).close;
