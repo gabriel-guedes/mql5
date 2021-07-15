@@ -13,11 +13,19 @@
 class CMyPosition
 {
 private:
-   double            mEADayProfit;
-   double            mEAOpenProfit;
-   uint              mBarsDuration;
+   double   mEADayProfit;
+   double   mEAOpenProfit;
+   uint     mBarsDuration;
+   long     mType;
+   ulong    mTicket;
+   double   mVolume;
 public:
-                     CMyPosition(void);
+   CMyPosition(void);
+   bool              UpdateInfo(ulong pMagic);
+   bool              IsOpen();
+   long              GetType();
+   ulong             GetTicket();
+   double            GetVolume();
    void              CalcEADayProfit(string pSymbol, ulong pMagic);
    double            GetEADayProfit();
    void              CalcEAOpenProfit(string pSymbol, ulong pMagic);
@@ -28,9 +36,9 @@ public:
    double            AdjustToTickSize(double pPoints);
    ulong             GetTicketByMagic(ulong pMagic);
    bool              ModifySLTP(ulong pTicket, ulong pMagic, double pSL, double pTP, double pVolume);
-   void              UpdateBarsDuration();   
+   void              UpdateBarsDuration();
    void              ResetBarsDuration();
-   uint              GetBarsDuration();   
+   uint              GetBarsDuration();
 };
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -38,6 +46,40 @@ public:
 void CMyPosition::CMyPosition(void)
 {
    ResetBarsDuration();
+}
+//+------------------------------------------------------------------+
+//| Update Position Info                               |
+//+------------------------------------------------------------------+
+bool CMyPosition::UpdateInfo(ulong pMagic)
+{
+   uint total = PositionsTotal();
+
+   mTicket = NULL;
+   mType = -1;
+   mVolume = 0.00;
+
+   for(uint i = 0; i < total; i++) {
+      string positionSymbol = PositionGetSymbol(i);
+      ulong magic = PositionGetInteger(POSITION_MAGIC);
+      if(magic == pMagic && positionSymbol == _Symbol) {
+         mTicket = PositionGetTicket(i);
+         mType = PositionGetInteger(POSITION_TYPE);
+         mVolume = PositionGetDouble(POSITION_VOLUME);
+         return(true);
+      }
+   }
+
+   return(false);
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool CMyPosition::IsOpen(void)
+{
+   if(mType == POSITION_TYPE_BUY || mType == POSITION_TYPE_SELL)
+      return(true);
+   else
+      return(false);
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -73,6 +115,27 @@ void CMyPosition::CalcEADayProfit(string pSymbol, ulong pMagic)
    }
 
 };
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+long CMyPosition::GetType(void)
+{
+   return(mType);
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+ulong CMyPosition::GetTicket(void)
+{
+   return(mTicket);
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CMyPosition::GetVolume(void)
+{
+   return(mVolume);
+}
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
