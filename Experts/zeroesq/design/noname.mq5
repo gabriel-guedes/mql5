@@ -87,14 +87,17 @@ void OnTick()
 
    bool goLong = false, goShort = false;
    double lastClose = bars.GetOne(1).close;
-   double lowestLow = bars.GetLowestLow();
-   double highestHigh = bars.GetHighestHigh();
+   double lowestClose = bars.GetLowestClose();
+   double highestClose = bars.GetHighestClose();
 
-   if(lastClose == lowestLow)
-      goShort = true;
+   if(lowestClose != highestClose) { //---skip dojis (they trigger consecutive reversals)
+      if(lastClose == lowestClose)
+         goShort = true;
 
-   if(lastClose == highestHigh)
-      goLong = true;
+      if(lastClose == highestClose)
+         goLong = true;
+   }
+
 
    if(position.IsOpen()) {          //---positioned
       if((position.GetType() == POSITION_TYPE_BUY && goShort) || ( position.GetType() == POSITION_TYPE_SELL && goLong))
