@@ -13,7 +13,7 @@ class CMyBars
 {
 protected:
    MqlRates          mBars[];
-   double            mClosedHighs[], mClosedLows[];
+   double            mClosedHighs[], mClosedLows[], mClosedCloses[];
    datetime          mLastBarTime;
    uint              mDayBarCount;
 public:
@@ -25,6 +25,8 @@ public:
    double            GetLowestLow();
    double            GetLowestHigh();
    double            GetHighestLow();
+   double            GetLowestClose();
+   double            GetHighestClose();   
    int               GetDayBarCount(string pSymbol, ENUM_TIMEFRAMES pTimeframe);
    bool              IsNewBar();
 };
@@ -36,6 +38,7 @@ CMyBars::CMyBars(void)
    ArraySetAsSeries(mBars, true);
    ArraySetAsSeries(mClosedHighs, true);
    ArraySetAsSeries(mClosedLows, true);
+   ArraySetAsSeries(mClosedCloses, true);
 
    mLastBarTime = 0;
 
@@ -53,6 +56,7 @@ void CMyBars::SetInfo(int pBarsCount)
    CopyRates(_Symbol, PERIOD_CURRENT, 0, barsTo, mBars);
    CopyHigh(_Symbol, PERIOD_CURRENT, 1, barsTo, mClosedHighs);
    CopyLow(_Symbol, PERIOD_CURRENT, 1, barsTo, mClosedLows);
+   CopyClose(_Symbol, PERIOD_CURRENT, 1, barsTo, mClosedCloses);
 
    if(mLastBarTime == 0)   //first run
       mLastBarTime = mBars[1].time;
@@ -107,6 +111,32 @@ double CMyBars::GetLowestHigh()
    int i = ArrayMinimum(mClosedHighs);
    return(mClosedHighs[i]);
 }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CMyBars::GetHighestClose()
+{
+   int i = ArrayMaximum(mClosedCloses);
+   return(mClosedCloses[i]);
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CMyBars::GetLowestClose()
+{
+   int i = ArrayMinimum(mClosedCloses);
+   return(mClosedCloses[i]);
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+
+
+
+
+
+
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
