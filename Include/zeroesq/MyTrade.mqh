@@ -39,6 +39,7 @@ public:
    bool              BuyStopLimit(double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
    bool              SellStopLimit(double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
    bool              Close(double pVolume = 0, string pComment = NULL);
+   bool              Reverse(long pOpenPositionType, double pVolume, string pComment = NULL);
    bool              RemoveOrder(ulong pTicket);
 };
 //+------------------------------------------------------------------+
@@ -280,6 +281,19 @@ bool CMyTrade::Close(double pVolume = 0.000000, string pComment = NULL)
    bool sendResult = SendAndCheckOrder(request);
 
    return(sendResult);
+}
+//+------------------------------------------------------------------+
+//| Reverse Position                                                   |
+//+------------------------------------------------------------------+
+bool CMyTrade::Reverse(long pOpenPositionType, double pVolume, string pComment)
+{
+   Close();
+   if(pOpenPositionType == POSITION_TYPE_SELL)
+      return(BuyMarket(pVolume, 0, 0, pComment));
+   else if(pOpenPositionType == POSITION_TYPE_BUY)
+      return(SellMarket(pVolume, 0, 0, pComment));
+   else
+      return(false);
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
