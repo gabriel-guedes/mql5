@@ -13,20 +13,16 @@ class CMyBars
 {
 protected:
    MqlRates          mBars[];
-   double            mClosedHighs[], mClosedLows[], mClosedCloses[];
    datetime          mLastBarTime;
    uint              mDayBarCount;
+   void              GetSlice(int pAppliedPrice, double &prices[], int pStartPos, int pCount);
 public:
    CMyBars(void);
    void              SetInfo(int pBarsCount);
    MqlRates          GetOne(int pShift);
    double            GetBarSize(int pShift);
-   double            GetHighestHigh();
-   double            GetLowestLow();
-   double            GetLowestHigh();
-   double            GetHighestLow();
-   double            GetLowestClose();
-   double            GetHighestClose();   
+   double            GetHighest(int pAppliedPrice, int pStartPos, int pCount);
+   double            GetLowest(int pAppliedPrice, int pStartPos, int pCount);
    int               GetDayBarCount(string pSymbol, ENUM_TIMEFRAMES pTimeframe);
    bool              IsNewBar();
 };
@@ -36,9 +32,6 @@ public:
 CMyBars::CMyBars(void)
 {
    ArraySetAsSeries(mBars, true);
-   ArraySetAsSeries(mClosedHighs, true);
-   ArraySetAsSeries(mClosedLows, true);
-   ArraySetAsSeries(mClosedCloses, true);
 
    mLastBarTime = 0;
 
@@ -54,20 +47,57 @@ void CMyBars::SetInfo(int pBarsCount)
       barsTo = pBarsCount;
 
    CopyRates(_Symbol, PERIOD_CURRENT, 0, barsTo, mBars);
-   CopyHigh(_Symbol, PERIOD_CURRENT, 1, barsTo, mClosedHighs);
-   CopyLow(_Symbol, PERIOD_CURRENT, 1, barsTo, mClosedLows);
-   CopyClose(_Symbol, PERIOD_CURRENT, 1, barsTo, mClosedCloses);
 
    if(mLastBarTime == 0)   //first run
       mLastBarTime = mBars[1].time;
 
 }
 //+------------------------------------------------------------------+
-//| Get Bar                                                          |
+//| Get One Bar                                                      |
 //+------------------------------------------------------------------+
 MqlRates CMyBars::GetOne(int pShift)
 {
    return mBars[pShift];
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void CMyBars::GetSlice(int pAppliedPrice, double &prices[], int pStartPos, int pCount)
+{
+
+   if(pCount<=0)
+      PrintFormat("ERROR - %s bar count must be greater then 0", __FILE__);
+   
+   if(pAppliedPrice == PRICE_CLOSE)
+      CopyClose(_Symbol, PERIOD_CURRENT, pStartPos, pCount, prices);
+   else if (pAppliedPrice == PRICE_OPEN)
+      CopyOpen(_Symbol, PERIOD_CURRENT, pStartPos, pCount, prices);
+   else if(pAppliedPrice == PRICE_LOW)
+      CopyLow(_Symbol, PERIOD_CURRENT, pStartPos, pCount, prices);
+   else if(pAppliedPrice == PRICE_HIGH)
+      CopyHigh(_Symbol, PERIOD_CURRENT, pStartPos, pCount, prices);
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CMyBars::GetHighest(int pAppliedPrice,int pStartPos,int pCount)
+{
+   double prices[];
+   GetSlice(pAppliedPrice, prices, pStartPos, pCount);
+
+   int i = ArrayMaximum(prices);
+   return(prices[i]);
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+double CMyBars::GetLowest(int pAppliedPrice,int pStartPos=0,int pCount=0)
+{
+   double prices[];
+   GetSlice(pAppliedPrice, prices, pStartPos, pCount);
+
+   int i = ArrayMinimum(prices);
+   return(prices[i]);
 }
 
 //+------------------------------------------------------------------+
@@ -79,64 +109,6 @@ double CMyBars::GetBarSize(int pShift)
    NormalizeDouble(barSize, _Digits);
    return(barSize);
 }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyBars::GetHighestHigh()
-{
-   int i = ArrayMaximum(mClosedHighs);
-   return(mClosedHighs[i]);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyBars::GetHighestLow()
-{
-   int i = ArrayMaximum(mClosedLows);
-   return(mClosedLows[i]);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyBars::GetLowestLow()
-{
-   int i = ArrayMinimum(mClosedLows);
-   return(mClosedLows[i]);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyBars::GetLowestHigh()
-{
-   int i = ArrayMinimum(mClosedHighs);
-   return(mClosedHighs[i]);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyBars::GetHighestClose()
-{
-   int i = ArrayMaximum(mClosedCloses);
-   return(mClosedCloses[i]);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-double CMyBars::GetLowestClose()
-{
-   int i = ArrayMinimum(mClosedCloses);
-   return(mClosedCloses[i]);
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-
-
-
-
-
-
-
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
