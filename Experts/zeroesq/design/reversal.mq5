@@ -14,12 +14,20 @@
 #include <zeroesq\MyUtils.mqh>
 #include <zeroesq\MyReport.mqh>
 
+enum myenum_directions
+{
+   LONG_ONLY,
+   SHORT_ONLY,
+   BOTH,
+};
+
 //+------------------------------------------------------------------+
 //| Inputs                                                           |
 //+------------------------------------------------------------------+
 input string   inpExpertName = "no name";  //Expert Name
-input uint     inpLongWindow = 10;
-input uint     inpShortWindow = 5;
+input uint     inpLongWindow = 10;         //Long Signal Bars Universe
+input uint     inpShortWindow = 10;        //Short Signal Bars Universe
+input myenum_directions inpDirection = BOTH;
 
 
 //+------------------------------------------------------------------+
@@ -94,8 +102,8 @@ void OnTick()
 
    bool goLong = false, goShort = false;
    double lastClose = bars.GetOne(1).close;
-   double lowestClose = bars.GetLowest(PRICE_CLOSE, 1, 10);
-   double highestClose = bars.GetHighest(PRICE_CLOSE, 1, 10);
+   double lowestClose = bars.GetLowest(PRICE_CLOSE, 1, inpShortWindow);
+   double highestClose = bars.GetHighest(PRICE_CLOSE, 1, inpLongWindow);
 
    if(lowestClose != highestClose) { //---skip dojis (they trigger consecutive reversals)
       if(lastClose == lowestClose)
@@ -108,12 +116,15 @@ void OnTick()
 
    if(position.IsOpen()) {          //---positioned
       if((position.GetType() == POSITION_TYPE_BUY && goShort) || ( position.GetType() == POSITION_TYPE_SELL && goLong))
-         trade.Reverse(position.GetType(), position.GetVolume());
+         if(inpDirection == BOTH)
+            trade.Reverse(position.GetType(), position.GetVolume());
+         else
+            trade.Close();
 
    } else {                         //---flat
-      if(goLong)
+      if(goLong && inpDirection != SHORT_ONLY)
          trade.BuyMarket(volume);
-      if(goShort)
+      if(goShort && inpDirection != LONG_ONLY)
          trade.SellMarket(volume);
 
    }
