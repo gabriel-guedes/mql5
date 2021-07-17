@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                   noname.mq5 |
+//|                                                     momentum.mq5 |
 //|                                           Gabriel Guedes de Sena |
 //|                                       twitter.com/gabriel_guedes |
 //+------------------------------------------------------------------+
@@ -97,8 +97,8 @@ void OnTick()
    bars.SetInfo(10);
    position.UpdateInfo(trade.GetMagic(), bars.GetOne(0).time);
 
-   if(bars.IsNewBar())
-      Print(position.GetBarsDuration());
+   //if(bars.IsNewBar())
+   //   Print(position.GetBarsDuration());
 
    bool goLong = false, goShort = false;
    double lastClose = bars.GetOne(1).close;
