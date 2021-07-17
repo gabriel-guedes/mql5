@@ -24,7 +24,7 @@ enum myenum_directions
 //+------------------------------------------------------------------+
 //| Inputs                                                           |
 //+------------------------------------------------------------------+
-input string   inpExpertName = "no name";  //Expert Name
+input string   inpExpertName = "momentum"; //Expert Name
 input uint     inpLongWindow = 10;         //Long Signal Bars Universe
 input uint     inpShortWindow = 10;        //Short Signal Bars Universe
 input myenum_directions inpDirection = BOTH;
