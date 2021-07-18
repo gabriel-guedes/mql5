@@ -113,18 +113,17 @@ void OnTick()
 
    if(position.IsOpen()) {          //---positioned
       //do nothing, let SL/TP handle the situation
-      Print("Positioned");
       return;
 
    } else {                         //---flat
       double sl, tp;
-      if(canGoLong && inpDirection != SHORT_ONLY){
+      if(canGoLong && inpDirection != SHORT_ONLY && bars.IsNewBar()){
          sl = bars.GetOne(0).open - (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE)*inpSLTicks);
          tp = bars.GetOne(0).open + (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE)*inpTPTicks);
          trade.BuyMarket(volume, sl, tp);
       }
 
-      if(canGoShort && inpDirection != LONG_ONLY){
+      if(canGoShort && inpDirection != LONG_ONLY && bars.IsNewBar()){
          sl = bars.GetOne(0).open + (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE)*inpSLTicks);
          tp = bars.GetOne(0).open - (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE)*inpTPTicks);      
          trade.SellMarket(volume, sl, tp);
