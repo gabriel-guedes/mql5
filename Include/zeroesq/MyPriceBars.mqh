@@ -13,11 +13,12 @@ class CMyBars
 {
 protected:
    MqlRates          mBars[];
-   datetime          mLastBarTime;
+   datetime          mLastClosedBarTime;
+   bool              mIsNewBar;
    uint              mDayBarCount;
    void              GetSlice(int pAppliedPrice, double &prices[], int pStartPos, int pCount);
 public:
-   CMyBars(void);
+                     CMyBars(void);
    void              SetInfo(int pBarsCount);
    MqlRates          GetOne(int pShift);
    double            GetBarSize(int pShift);
@@ -32,8 +33,8 @@ public:
 CMyBars::CMyBars(void)
 {
    ArraySetAsSeries(mBars, true);
-
-   mLastBarTime = 0;
+   mLastClosedBarTime = 0;
+   mIsNewBar = false;
 
 }
 //+------------------------------------------------------------------+
@@ -48,8 +49,14 @@ void CMyBars::SetInfo(int pBarsCount)
 
    CopyRates(_Symbol, PERIOD_CURRENT, 0, barsTo, mBars);
 
-   if(mLastBarTime == 0)   //first run
-      mLastBarTime = mBars[1].time;
+   if(mLastClosedBarTime < mBars[1].time) {
+      mLastClosedBarTime = mBars[1].time;
+      mIsNewBar = true;
+
+   } else {
+      mIsNewBar = false;
+   }
+
 
 }
 //+------------------------------------------------------------------+
@@ -65,9 +72,9 @@ MqlRates CMyBars::GetOne(int pShift)
 void CMyBars::GetSlice(int pAppliedPrice, double &prices[], int pStartPos, int pCount)
 {
 
-   if(pCount<=0)
+   if(pCount <= 0)
       PrintFormat("ERROR - %s bar count must be greater then 0", __FILE__);
-   
+
    if(pAppliedPrice == PRICE_CLOSE)
       CopyClose(_Symbol, PERIOD_CURRENT, pStartPos, pCount, prices);
    else if (pAppliedPrice == PRICE_OPEN)
@@ -80,7 +87,7 @@ void CMyBars::GetSlice(int pAppliedPrice, double &prices[], int pStartPos, int p
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CMyBars::GetHighest(int pAppliedPrice,int pStartPos,int pCount)
+double CMyBars::GetHighest(int pAppliedPrice, int pStartPos, int pCount)
 {
    double prices[];
    GetSlice(pAppliedPrice, prices, pStartPos, pCount);
@@ -91,7 +98,7 @@ double CMyBars::GetHighest(int pAppliedPrice,int pStartPos,int pCount)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CMyBars::GetLowest(int pAppliedPrice,int pStartPos=0,int pCount=0)
+double CMyBars::GetLowest(int pAppliedPrice, int pStartPos = 0, int pCount = 0)
 {
    double prices[];
    GetSlice(pAppliedPrice, prices, pStartPos, pCount);
@@ -114,16 +121,11 @@ double CMyBars::GetBarSize(int pShift)
 //+------------------------------------------------------------------+
 bool CMyBars::IsNewBar()
 {
-   if(mLastBarTime == 0) {
+   if(mLastClosedBarTime == 0) {
       Print("ERROR - Bars not set. Use meth CMyBars.SetInfo");
-      return(false);
    }
 
-   if(mBars[0].time > mLastBarTime) {
-      mLastBarTime = mBars[0].time;
-      return(true);
-   } else
-      return(false);
+   return(mIsNewBar);
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
