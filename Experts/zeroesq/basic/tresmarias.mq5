@@ -28,13 +28,11 @@ CMyReport   report;
 //+------------------------------------------------------------------+
 //| Indicator handles and buffers                                    |
 //+------------------------------------------------------------------+
-int atrHandle = INVALID_HANDLE;
-double atr[];
+
 //+------------------------------------------------------------------+
 //| Global Variables                                                 |
 //+------------------------------------------------------------------+
 double volume = 0.00;
-
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -42,10 +40,7 @@ double volume = 0.00;
 int OnInit()
 {
    report.SetStartTime();
-   
-   atrHandle = iATR(_Symbol, PERIOD_CURRENT, 20);
-   ArraySetAsSeries(atr, true);
-    
+
    if(!utils.IsValidExpertName(inpExpertName)) {
       return(INIT_FAILED);
    }
@@ -53,8 +48,8 @@ int OnInit()
    ulong magic_number = utils.StringToMagic(inpExpertName);
    if (!trade.SetMagicNumber(magic_number))
       return(INIT_FAILED);
-      
-   volume = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);            
+
+   volume = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
 
    return(INIT_SUCCEEDED);
 
@@ -76,38 +71,22 @@ void OnDeinit(const int reason)
 void OnTick()
 {
    bars.SetInfo(4);
+   position.UpdateInfo(trade.GetMagic(), bars.GetOne(0).time);
 
-   bool isNewBar = bars.IsNewBar();
-
-   ulong positionTicket = position.GetTicketByMagic(trade.GetMagic());
-
-   if(positionTicket != NULL) {
-      if(isNewBar)
-         position.UpdateBarsDuration();
-      
-      uint duration = position.GetBarsDuration();
-      if(duration > 5)
-         trade.Close();
+   if(position.IsOpen()) {
+      return;
 
    } else {
       MqlRates bar3 = bars.GetOne(3);
       MqlRates bar2 = bars.GetOne(2);
       MqlRates bar1 = bars.GetOne(1);
-           
-      if(bar1.low > bar2.low && bar2.low > bar3.low) {
-         CopyBuffer(atrHandle, 0, 0, 2, atr);
-         double trueRange = atr[1];
-         double sl = bar3.low;
-         double tp = bar1.high + (bar1.close - bar3.low);
-         
-         pending.CancelAllByMagic(trade.GetMagic());
-         bool trade_ok = trade.BuyMarket(volume, sl, tp);
-         if(trade_ok)
-            position.ResetBarsDuration();
+
+      if(bar1.low > bar2.low && bar2.low > bar3.low && bars.IsNewBar()) {
+         double sl = utils.AdjustToTick(bar3.low);
+         double tp = utils.AdjustToTick(bar1.high + (bar1.close - bar3.low));
+         trade.BuyMarket(volume, sl, tp);
       }
-
    }
-
 }
 //+------------------------------------------------------------------+
 //| Timer function                                                   |
@@ -142,7 +121,7 @@ double OnTester()
    double ret = 0.0;
    report.SetEndTime();
    report.SetDeals(trade.GetMagic(), 0, TimeCurrent());
-   //report.SaveDealsToCSV();
+//report.SaveDealsToCSV();
 
    return(ret);
 }
