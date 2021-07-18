@@ -15,8 +15,10 @@ protected:
    MqlRates          mBars[];
    datetime          mLastClosedBarTime;
    bool              mIsNewBar;
+   bool              mIsFirstOfTheDay;
    uint              mDayBarCount;
    void              GetSlice(int pAppliedPrice, double &prices[], int pStartPos, int pCount);
+   bool              CheckIfNewDay(datetime pLast, datetime pCurrent);
 public:
                      CMyBars(void);
    void              SetInfo(int pBarsCount);
@@ -26,6 +28,7 @@ public:
    double            GetLowest(int pAppliedPrice, int pStartPos, int pCount);
    int               GetDayBarCount(string pSymbol, ENUM_TIMEFRAMES pTimeframe);
    bool              IsNewBar();
+   bool              IsFirstOfTheDay();   
 };
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -50,13 +53,14 @@ void CMyBars::SetInfo(int pBarsCount)
    CopyRates(_Symbol, PERIOD_CURRENT, 0, barsTo, mBars);
 
    if(mLastClosedBarTime < mBars[1].time) {
-      mLastClosedBarTime = mBars[1].time;
       mIsNewBar = true;
+      mLastClosedBarTime = mBars[1].time;
 
    } else {
       mIsNewBar = false;
    }
-
+   
+   mIsFirstOfTheDay = CheckIfNewDay(mBars[1].time, mBars[0].time);   
 
 }
 //+------------------------------------------------------------------+
@@ -126,6 +130,30 @@ bool CMyBars::IsNewBar()
    }
 
    return(mIsNewBar);
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool CMyBars::IsFirstOfTheDay(void)
+{
+   return(mIsFirstOfTheDay);
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool CMyBars::CheckIfNewDay(datetime pLast,datetime pCurrent)
+{
+   MqlDateTime last, current;
+   
+   TimeToStruct(pLast, last);
+   TimeToStruct(pCurrent, current);
+   
+   if(current.day > last.day || current.mon > last.mon || current.year > last.year)
+      return(true);
+   else
+      return(false);
+   
+   
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
