@@ -97,7 +97,6 @@ void OnTick()
 //if(bars.IsNewBar())
 //   Print(position.GetBarsDuration());
 
-   bool goLong = false, goShort = false;
    double lastClose = bars.GetOne(1).close;
    
    CopyBuffer(bbHandle, 1, 0, 10, bbUpper);
