@@ -7,12 +7,13 @@
 #property link      "twitter.com/gabriel_guedes"
 #property version   "1.00"
 
-#include <zeroesq\MyTrade.mqh>
 #include <zeroesq\MyPosition.mqh>
 #include <zeroesq\MyPriceBars.mqh>
 #include <zeroesq\MyPending.mqh>
 #include <zeroesq\MyUtils.mqh>
 #include <zeroesq\MyReport.mqh>
+#include <zeroesq\MyChart.mqh>
+
 
 input string   inpExpertName = "tres marias";  //Expert Name
 
@@ -20,11 +21,12 @@ input string   inpExpertName = "tres marias";  //Expert Name
 //| My Basic Objects                                                 |
 //+------------------------------------------------------------------+
 CMyPosition position;
-CMyTrade    trade;
+//CMyTrade    trade;
 CMyBars     bars;
 CMyPending  pending;
 CMyUtils    utils;
 CMyReport   report;
+CMyChart    chart;
 //+------------------------------------------------------------------+
 //| Indicator handles and buffers                                    |
 //+------------------------------------------------------------------+
@@ -39,14 +41,17 @@ double volume = 0.00;
 //+------------------------------------------------------------------+
 int OnInit()
 {
+   
    report.SetStartTime();
+   
+   //slLine.Create(0, "Stop Loss", 0, 0.00);   
 
    if(!utils.IsValidExpertName(inpExpertName)) {
       return(INIT_FAILED);
    }
 
    ulong magic_number = utils.StringToMagic(inpExpertName);
-   if (!trade.SetMagicNumber(magic_number))
+   if (!position.SetMagic(magic_number))
       return(INIT_FAILED);
 
    volume = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
@@ -62,7 +67,7 @@ void OnDeinit(const int reason)
 //--- destroy timer
    EventKillTimer();
 
-   trade.ReleaseMagicNumber();
+   position.ResetMagic();
 
 }
 //+------------------------------------------------------------------+
@@ -71,20 +76,32 @@ void OnDeinit(const int reason)
 void OnTick()
 {
    bars.SetInfo(4);
-   position.UpdateInfo(trade.GetMagic(), bars.GetOne(0).time);
+   position.UpdateInfo(bars.GetOne(0).time);
+
+   MqlRates bar3 = bars.GetOne(3);
+   MqlRates bar2 = bars.GetOne(2);
+   MqlRates bar1 = bars.GetOne(1);
+
+   //slLine.SetDouble(OBJPROP_PRICE, bar3.low);
+   chart.SetSLTP(bar3.low, bar1.high);
+
+   bool canGoLong = false;
+   if(bar1.low > bar2.low && bar2.low > bar3.low && !bars.IsFirstOfTheDay()) {
+      canGoLong = true;
+   }
 
    if(position.IsOpen()) {
-      return;
+      if(position.GetBarsDuration() == 4) {
+         position.SetBreakevenSLTP();
+      }
 
    } else {
-      MqlRates bar3 = bars.GetOne(3);
-      MqlRates bar2 = bars.GetOne(2);
-      MqlRates bar1 = bars.GetOne(1);
-
-      if(bar1.low > bar2.low && bar2.low > bar3.low && bars.IsNewBar()) {
+      if(canGoLong) {
          double sl = utils.AdjustToTick(bar3.low);
          double tp = utils.AdjustToTick(bar1.high + (bar1.close - bar3.low));
-         trade.BuyMarket(volume, sl, tp);
+         double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+         tp = utils.AdjustToTick(ask + 700);
+         position.OpenAtMarket(POSITION_TYPE_BUY, volume);
       }
    }
 }
@@ -120,7 +137,7 @@ double OnTester()
 {
    double ret = 0.0;
    report.SetEndTime();
-   report.SetDeals(trade.GetMagic(), 0, TimeCurrent());
+   report.SetDeals(position.GetMagic(), 0, TimeCurrent());
 //report.SaveDealsToCSV();
 
    return(ret);

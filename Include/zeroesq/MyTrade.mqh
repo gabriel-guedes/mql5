@@ -14,9 +14,9 @@ class CMyTrade
 private:
    ENUM_ORDER_TYPE_FILLING mFillType;
    ulong             mDeviation;
-   ulong             mMagic;
-   bool              OpenPosition(ENUM_ORDER_TYPE pType, double pVolume, double pStop = 0, double pProfit = 0, string pComment = NULL);
-   bool              OpenPending(ENUM_ORDER_TYPE pType, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, double pStoplimit = 0, datetime pExpiration = 0, string pComment = NULL);
+   //ulong             mMagic;
+   bool              OpenPosition(ENUM_ORDER_TYPE pType, ulong pMagic, double pVolume, double pStop = 0.00000, double pProfit = 0.00000, string pComment = NULL);
+   bool              OpenPending(ENUM_ORDER_TYPE pType, ulong pMagic, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, double pStoplimit = 0, datetime pExpiration = 0, string pComment = NULL);
    bool              SendAndCheckOrder(MqlTradeRequest &pRequest);
    bool              SelectPositionByMagic(ulong pMagic);
    string            GetOrderTypeDescription(ENUM_ORDER_TYPE pType);
@@ -25,22 +25,21 @@ private:
 
 public:
                      CMyTrade(void);
-   bool              SetMagicNumber(ulong pMagic);
-   void              ReleaseMagicNumber();
+   //void              ReleaseMagicNumber();
    void              SetDeviation(ulong pDeviation);
    void              SetFillType(ENUM_ORDER_TYPE_FILLING pFilltype);
    ulong             GetMagic();
-   bool              BuyMarket(double pVolume, double pStop = 0, double pProfit = 0, string pComment = NULL);
-   bool              SellMarket(double pVolume, double pStop = 0, double pProfit = 0, string pComment = NULL);
-   bool              BuyStop(double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
-   bool              SellStop(double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
-   bool              BuyLimit(double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
-   bool              SellLimit(double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
-   bool              BuyStopLimit(double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
-   bool              SellStopLimit(double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
-   bool              Close(double pVolume = 0, string pComment = NULL);
-   bool              Reverse(long pOpenPositionType, double pVolume, string pComment = NULL);
-   bool              RemoveOrder(ulong pTicket);
+   bool              BuyMarket(ulong pMagic, double pVolume, double pStop = 0, double pProfit = 0, string pComment = NULL);
+   bool              SellMarket(ulong pMagic, double pVolume, double pStop = 0, double pProfit = 0, string pComment = NULL);
+   bool              BuyStop(ulong pMagic, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
+   bool              SellStop(ulong pMagic, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
+   bool              BuyLimit(ulong pMagic, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
+   bool              SellLimit(ulong pMagic, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
+   bool              BuyStopLimit(ulong pMagic, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
+   bool              SellStopLimit(ulong pMagic, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
+   bool              Close( ulong pMagic, double pVolume = 0, string pComment = NULL);
+   bool              Reverse(long pOpenPositionType, long pMagic, double pVolume, string pComment = NULL);
+   //bool              RemoveOrder(ulong pTicket);
 };
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
@@ -51,30 +50,12 @@ void CMyTrade::CMyTrade(void)
    mFillType = ORDER_FILLING_IOC;
 }
 //+------------------------------------------------------------------+
-//| SetMagicNumber                                                   |
-//+------------------------------------------------------------------+
-bool CMyTrade::SetMagicNumber(ulong pMagic)
-{
-   if(!GlobalVariableCheck((string)pMagic)) {
-      PrintFormat("INFO - Registering %u magic number", pMagic);
-      mMagic = pMagic;
-      GlobalVariableSet((string)pMagic, 0.00);
-      return(true);
-   }
-   
-   else {
-      PrintFormat("ERROR - EA Magic Number already in use");
-      return(false);
-   }
-
-}
-//+------------------------------------------------------------------+
 //| Release Magic Number                                             |
 //+------------------------------------------------------------------+
-void CMyTrade::ReleaseMagicNumber(void)
-{
-   GlobalVariableDel((string)mMagic);
-}
+//void CMyTrade::ReleaseMagicNumber(void)
+//{
+//   GlobalVariableDel((string)mMagic);
+//}
 
 //+------------------------------------------------------------------+
 //| Set Deviation                                                    |
@@ -90,17 +71,17 @@ void CMyTrade::SetFillType(ENUM_ORDER_TYPE_FILLING pFilltype)
 {
    mFillType = pFilltype;
 }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-ulong CMyTrade::GetMagic(void)
-{
-   return mMagic;
-}
+////+------------------------------------------------------------------+
+////|                                                                  |
+////+------------------------------------------------------------------+
+//ulong CMyTrade::GetMagic(void)
+//{
+//   return mMagic;
+//}
 //+------------------------------------------------------------------+
 //| Open Position                                                    |
 //+------------------------------------------------------------------+
-bool CMyTrade::OpenPosition(ENUM_ORDER_TYPE pType, double pVolume, double pStop = 0.000000, double pProfit = 0.000000, string pComment = NULL)
+bool CMyTrade::OpenPosition(ENUM_ORDER_TYPE pType, ulong pMagic, double pVolume, double pStop = 0.000000, double pProfit = 0.000000, string pComment = NULL)
 {
    MqlTradeRequest request = {};
 
@@ -113,7 +94,7 @@ bool CMyTrade::OpenPosition(ENUM_ORDER_TYPE pType, double pVolume, double pStop 
    request.deviation = mDeviation;
    request.type_filling = mFillType;
    request.comment = pComment;
-   request.magic = mMagic;
+   request.magic = pMagic;
 
    if(pType == ORDER_TYPE_BUY)
       request.price = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
@@ -127,7 +108,7 @@ bool CMyTrade::OpenPosition(ENUM_ORDER_TYPE pType, double pVolume, double pStop 
 //+------------------------------------------------------------------+
 //| Open Pending                                                     |
 //+------------------------------------------------------------------+
-bool CMyTrade::OpenPending(ENUM_ORDER_TYPE pType, double pVolume, double pPrice, double pStop = 0, double pProfit = 0,
+bool CMyTrade::OpenPending(ENUM_ORDER_TYPE pType, ulong pMagic, double pVolume, double pPrice, double pStop = 0, double pProfit = 0,
                            double pStoplimit = 0, datetime pExpiration = 0, string pComment = NULL)
 {
    MqlTradeRequest request = {};
@@ -141,7 +122,7 @@ bool CMyTrade::OpenPending(ENUM_ORDER_TYPE pType, double pVolume, double pPrice,
    request.volume = pVolume;
    request.price = pPrice;
    request.stoplimit = pStoplimit;
-   request.magic = mMagic;
+   request.magic = pMagic;
 
    if(pExpiration > 0) {
       request.expiration = pExpiration;
@@ -185,80 +166,80 @@ bool CMyTrade::SendAndCheckOrder(MqlTradeRequest &pRequest)
 //+------------------------------------------------------------------+
 //| Buy Market                                                       |
 //+------------------------------------------------------------------+
-bool CMyTrade::BuyMarket(double pVolume, double pStop = 0.000000, double pProfit = 0.000000, string pComment = NULL)
+bool CMyTrade::BuyMarket(ulong pMagic, double pVolume, double pStop = 0.000000, double pProfit = 0.000000, string pComment = NULL)
 {
-   bool success = OpenPosition(ORDER_TYPE_BUY, pVolume, pStop, pProfit, pComment);
+   bool success = OpenPosition(ORDER_TYPE_BUY, pMagic, pVolume, pStop, pProfit, pComment);
    return(success);
 }
 //+------------------------------------------------------------------+
 //| Sell Market                                                      |
 //+------------------------------------------------------------------+
-bool CMyTrade::SellMarket(double pVolume, double pStop = 0.000000, double pProfit = 0.000000, string pComment = NULL)
+bool CMyTrade::SellMarket(ulong pMagic, double pVolume, double pStop = 0.000000, double pProfit = 0.000000, string pComment = NULL)
 {
-   bool success = OpenPosition(ORDER_TYPE_SELL, pVolume, pStop, pProfit, pComment);
+   bool success = OpenPosition(ORDER_TYPE_SELL, pMagic, pVolume, pStop, pProfit, pComment);
    return(success);
 }
 //+------------------------------------------------------------------+
 //| Buy Stop                                                         |
 //+------------------------------------------------------------------+
-bool CMyTrade::BuyStop(double pVolume, double pPrice, double pStop = 0.000000, double pProfit = 0.000000, datetime pExpiration = 0, string pComment = NULL)
+bool CMyTrade::BuyStop(ulong pMagic, double pVolume, double pPrice, double pStop = 0.000000, double pProfit = 0.000000, datetime pExpiration = 0, string pComment = NULL)
 {
-   bool success = OpenPending(ORDER_TYPE_BUY_STOP, pVolume, pPrice, pStop, pProfit, 0.00, pExpiration, pComment);
+   bool success = OpenPending(ORDER_TYPE_BUY_STOP, pMagic, pVolume, pPrice, pStop, pProfit, 0.00, pExpiration, pComment);
    return(success);
 }
 //+------------------------------------------------------------------+
 //| Sell Stop                                                        |
 //+------------------------------------------------------------------+
-bool CMyTrade::SellStop(double pVolume, double pPrice, double pStop = 0.000000, double pProfit = 0.000000, datetime pExpiration = 0, string pComment = NULL)
+bool CMyTrade::SellStop(ulong pMagic, double pVolume, double pPrice, double pStop = 0.000000, double pProfit = 0.000000, datetime pExpiration = 0, string pComment = NULL)
 {
-   bool success = OpenPending(ORDER_TYPE_SELL_STOP, pVolume, pPrice, pStop, pProfit, 0.00, pExpiration, pComment);
+   bool success = OpenPending(ORDER_TYPE_SELL_STOP, pMagic, pVolume, pPrice, pStop, pProfit, 0.00, pExpiration, pComment);
    return(success);
 }
 //+------------------------------------------------------------------+
 //| Buy Limit                                                        |
 //+------------------------------------------------------------------+
-bool CMyTrade::BuyLimit(double pVolume, double pPrice, double pStop = 0.000000, double pProfit = 0.000000, datetime pExpiration = 0, string pComment = NULL)
+bool CMyTrade::BuyLimit(ulong pMagic, double pVolume, double pPrice, double pStop = 0.000000, double pProfit = 0.000000, datetime pExpiration = 0, string pComment = NULL)
 {
-   bool success = OpenPending(ORDER_TYPE_BUY_LIMIT, pVolume, pPrice, pStop, pProfit, 0.00, pExpiration, pComment);
+   bool success = OpenPending(ORDER_TYPE_BUY_LIMIT, pMagic, pVolume, pPrice, pStop, pProfit, 0.00, pExpiration, pComment);
    return(success);
 }
 //+------------------------------------------------------------------+
 //| Sell Limit                                                       |
 //+------------------------------------------------------------------+
-bool CMyTrade::SellLimit(double pVolume, double pPrice, double pStop = 0.000000, double pProfit = 0.000000, datetime pExpiration = 0, string pComment = NULL)
+bool CMyTrade::SellLimit(ulong pMagic, double pVolume, double pPrice, double pStop = 0.000000, double pProfit = 0.000000, datetime pExpiration = 0, string pComment = NULL)
 {
-   bool success = OpenPending(ORDER_TYPE_SELL_LIMIT, pVolume, pPrice, pStop, pProfit, 0.00, pExpiration, pComment);
+   bool success = OpenPending(ORDER_TYPE_SELL_LIMIT, pMagic, pVolume, pPrice, pStop, pProfit, 0.00, pExpiration, pComment);
    return(success);
 }
 //+------------------------------------------------------------------+
 //| Buy Stop Limit                                                   |
 //+------------------------------------------------------------------+
-bool CMyTrade::BuyStopLimit(double pVolume, double pPrice, double pStop = 0.000000, double pProfit = 0.000000, datetime pExpiration = 0, string pComment = NULL)
+bool CMyTrade::BuyStopLimit(ulong pMagic, double pVolume, double pPrice, double pStop = 0.000000, double pProfit = 0.000000, datetime pExpiration = 0, string pComment = NULL)
 {
-   bool success = OpenPending(ORDER_TYPE_BUY_STOP_LIMIT, pVolume, pPrice, pStop, pProfit, pPrice, pExpiration, pComment);
+   bool success = OpenPending(ORDER_TYPE_BUY_STOP_LIMIT, pMagic, pVolume, pPrice, pStop, pProfit, pPrice, pExpiration, pComment);
    return(success);
 }
 //+------------------------------------------------------------------+
 //| Sell Stop Limit                                                  |
 //+------------------------------------------------------------------+
-bool CMyTrade::SellStopLimit(double pVolume, double pPrice, double pStop = 0.000000, double pProfit = 0.000000, datetime pExpiration = 0, string pComment = NULL)
+bool CMyTrade::SellStopLimit(ulong pMagic, double pVolume, double pPrice, double pStop = 0.000000, double pProfit = 0.000000, datetime pExpiration = 0, string pComment = NULL)
 {
-   bool success = OpenPending(ORDER_TYPE_SELL_STOP_LIMIT, pVolume, pPrice, pStop, pProfit, pPrice, pExpiration, pComment);
+   bool success = OpenPending(ORDER_TYPE_SELL_STOP_LIMIT, pMagic, pVolume, pPrice, pStop, pProfit, pPrice, pExpiration, pComment);
    return(success);
 }
 //+------------------------------------------------------------------+
 //| Close Position                                                   |
 //+------------------------------------------------------------------+
-bool CMyTrade::Close(double pVolume = 0.000000, string pComment = NULL)
+bool CMyTrade::Close(ulong pMagic, double pVolume = 0.000000, string pComment = NULL)
 {
    MqlTradeRequest request = {};
 
    request.action = TRADE_ACTION_DEAL;
    request.symbol = _Symbol;
    request.comment = pComment;
-   request.magic = mMagic;
+   request.magic = pMagic;
 
-   if(!SelectPositionByMagic(mMagic)) return(false);
+   if(!SelectPositionByMagic(pMagic)) return(false);
 
    request.position = PositionGetInteger(POSITION_TICKET);
 
@@ -285,13 +266,13 @@ bool CMyTrade::Close(double pVolume = 0.000000, string pComment = NULL)
 //+------------------------------------------------------------------+
 //| Reverse Position                                                   |
 //+------------------------------------------------------------------+
-bool CMyTrade::Reverse(long pOpenPositionType, double pVolume, string pComment)
+bool CMyTrade::Reverse(long pOpenPositionType, long pMagic, double pVolume, string pComment)
 {
-   Close();
+   Close(pMagic);
    if(pOpenPositionType == POSITION_TYPE_SELL)
-      return(BuyMarket(pVolume, 0, 0, pComment));
+      return(BuyMarket(pMagic, pVolume, 0, 0, pComment));
    else if(pOpenPositionType == POSITION_TYPE_BUY)
-      return(SellMarket(pVolume, 0, 0, pComment));
+      return(SellMarket(pMagic, pVolume, 0, 0, pComment));
    else
       return(false);
 }
@@ -313,21 +294,6 @@ bool CMyTrade::SelectPositionByMagic(ulong pMagic)
    }
    return(res);
 }
-//+------------------------------------------------------------------+
-//| Delete One pending order                                         |
-//+------------------------------------------------------------------+
-bool CMyTrade::RemoveOrder(ulong pTicket)
-{
-   MqlTradeRequest request = {};
-
-   request.action = TRADE_ACTION_REMOVE;
-   request.order = pTicket;
-
-   bool sendResult = SendAndCheckOrder(request);
-
-   return(sendResult);
-}
-
 //+------------------------------------------------------------------+
 //| Get order type description                                       |
 //+------------------------------------------------------------------+
