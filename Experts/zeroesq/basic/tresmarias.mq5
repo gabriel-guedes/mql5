@@ -9,11 +9,9 @@
 
 #include <zeroesq\MyPosition.mqh>
 #include <zeroesq\MyPriceBars.mqh>
-#include <zeroesq\MyPending.mqh>
 #include <zeroesq\MyUtils.mqh>
 #include <zeroesq\MyReport.mqh>
 #include <zeroesq\MyChart.mqh>
-
 
 input string   inpExpertName = "tres marias";  //Expert Name
 
@@ -21,9 +19,7 @@ input string   inpExpertName = "tres marias";  //Expert Name
 //| My Basic Objects                                                 |
 //+------------------------------------------------------------------+
 CMyPosition position;
-//CMyTrade    trade;
 CMyBars     bars;
-CMyPending  pending;
 CMyUtils    utils;
 CMyReport   report;
 CMyChart    chart;
@@ -44,8 +40,6 @@ int OnInit()
    
    report.SetStartTime();
    
-   //slLine.Create(0, "Stop Loss", 0, 0.00);   
-
    if(!utils.IsValidExpertName(inpExpertName)) {
       return(INIT_FAILED);
    }
@@ -67,7 +61,7 @@ void OnDeinit(const int reason)
 //--- destroy timer
    EventKillTimer();
 
-   position.ResetMagic();
+   position.ReleaseMagic();
 
 }
 //+------------------------------------------------------------------+
@@ -84,7 +78,6 @@ void OnTick()
    MqlRates bar2 = bars.GetOne(2);
    MqlRates bar1 = bars.GetOne(1);
    
-   //slLine.SetDouble(OBJPROP_PRICE, bar3.low);
    chart.SetSLTP(position.GetSL(), position.GetTP());
 
    bool canGoLong = false;
@@ -100,12 +93,12 @@ void OnTick()
       position.CloseIfSLTP(lastDeal);
 
    } else {
-      if(canGoLong) {
+      if(canGoLong && bars.IsNewBar()) {
          double sl = utils.AdjustToTick(bar3.low);
          double tp = utils.AdjustToTick(bar1.high + (bar1.close - bar3.low));
          double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
-         tp = utils.AdjustToTick(ask + 700);
-         sl = utils.AdjustToTick(ask - 700);
+         tp = utils.AdjustToTick(ask + 1500);
+         sl = utils.AdjustToTick(ask - 3500);
          position.OpenAtMarket(POSITION_TYPE_BUY, volume, sl, tp);
       }
    }
