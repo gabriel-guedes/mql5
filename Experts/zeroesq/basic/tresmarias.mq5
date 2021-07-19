@@ -77,13 +77,15 @@ void OnTick()
 {
    bars.SetInfo(4);
    position.UpdateInfo(bars.GetOne(0).time);
+   
+   double lastDeal = SymbolInfoDouble(_Symbol, SYMBOL_LAST);
 
    MqlRates bar3 = bars.GetOne(3);
    MqlRates bar2 = bars.GetOne(2);
    MqlRates bar1 = bars.GetOne(1);
-
+   
    //slLine.SetDouble(OBJPROP_PRICE, bar3.low);
-   chart.SetSLTP(bar3.low, bar1.high);
+   chart.SetSLTP(position.GetSL(), position.GetTP());
 
    bool canGoLong = false;
    if(bar1.low > bar2.low && bar2.low > bar3.low && !bars.IsFirstOfTheDay()) {
@@ -94,6 +96,8 @@ void OnTick()
       if(position.GetBarsDuration() == 4) {
          position.SetBreakevenSLTP();
       }
+      
+      position.CloseIfSLTP(lastDeal);
 
    } else {
       if(canGoLong) {
@@ -101,7 +105,8 @@ void OnTick()
          double tp = utils.AdjustToTick(bar1.high + (bar1.close - bar3.low));
          double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
          tp = utils.AdjustToTick(ask + 700);
-         position.OpenAtMarket(POSITION_TYPE_BUY, volume);
+         sl = utils.AdjustToTick(ask - 700);
+         position.OpenAtMarket(POSITION_TYPE_BUY, volume, sl, tp);
       }
    }
 }
