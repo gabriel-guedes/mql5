@@ -7,10 +7,10 @@
 #property link      "twitter.com/gabriel_guedes"
 #property version   "1.00"
 
-#include <zeroesq\MyTrade.mqh>
+//#include <zeroesq\MyTrade.mqh>
 #include <zeroesq\MyPosition.mqh>
 #include <zeroesq\MyPriceBars.mqh>
-#include <zeroesq\MyPending.mqh>
+//#include <zeroesq\MyPending.mqh>
 #include <zeroesq\MyUtils.mqh>
 #include <zeroesq\MyReport.mqh>
 
@@ -34,9 +34,9 @@ input myenum_directions inpDirection = BOTH;       //Trade Direction
 //| My Basic Objects                                                 |
 //+------------------------------------------------------------------+
 CMyPosition position;
-CMyTrade    trade;
+//CMyTrade    trade;
 CMyBars     bars;
-CMyPending  pending;
+//CMyPending  pending;
 CMyUtils    utils;
 CMyReport   report;
 //+------------------------------------------------------------------+
@@ -67,7 +67,7 @@ int OnInit()
    }
 
    ulong magic_number = utils.StringToMagic(inpExpertName);
-   if (!trade.SetMagicNumber(magic_number))
+   if (!position.SetMagic(magic_number))
       return(INIT_FAILED);
 
    volume = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
@@ -83,7 +83,7 @@ void OnDeinit(const int reason)
 //--- destroy timer
    EventKillTimer();
 
-   trade.ReleaseMagicNumber();
+   position.ReleaseMagic();
 
 }
 //+------------------------------------------------------------------+
@@ -92,7 +92,7 @@ void OnDeinit(const int reason)
 void OnTick()
 {
    bars.SetInfo(10);
-   position.UpdateInfo(trade.GetMagic(), bars.GetOne(0).time);
+   position.UpdateInfo(bars.GetOne(0).time);
 
 //if(bars.IsNewBar())
 //   Print(position.GetBarsDuration());
@@ -111,13 +111,13 @@ void OnTick()
 
    if(position.IsOpen()) {          //---positioned
       if(position.GetBarsDuration() >= 4)
-         trade.Close();
+         position.Close();
 
    } else {                         //---flat
       if(canGoLong && inpDirection != SHORT_ONLY)
-         trade.BuyMarket(volume);
+         position.OpenAtMarket(POSITION_TYPE_BUY, volume, 0, 0);
       if(canGoShort && inpDirection != LONG_ONLY)
-         trade.SellMarket(volume);
+         position.OpenAtMarket(POSITION_TYPE_SELL, volume, 0, 0);
 
    }
 
@@ -154,7 +154,7 @@ double OnTester()
 {
    double ret = 0.0;
    report.SetEndTime();
-   report.SetDeals(trade.GetMagic(), 0, TimeCurrent());
+   report.SetDeals(position.GetMagic(), 0, TimeCurrent());
 //report.SaveDealsToCSV();
 
    return(ret);
