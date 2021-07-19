@@ -29,9 +29,11 @@ void CMyChart::CMyChart(void)
 {
    sl_line.Create(0, "Stop Loss", 0, 0.00);
    sl_line.SetInteger(OBJPROP_COLOR, clrRed);
+   sl_line.SetInteger(OBJPROP_STYLE, STYLE_DOT);
    
    tp_line.Create(0, "Take Profit", 0, 0.00);
    tp_line.SetInteger(OBJPROP_COLOR, clrMediumBlue);
+   tp_line.SetInteger(OBJPROP_STYLE, STYLE_DOT);
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
