@@ -37,16 +37,19 @@ double volume = 0.00;
 //+------------------------------------------------------------------+
 int OnInit()
 {
-   
+
    report.SetStartTime();
-   
+
    if(!utils.IsValidExpertName(inpExpertName)) {
       return(INIT_FAILED);
    }
 
    ulong magic_number = utils.StringToMagic(inpExpertName);
-   if (!position.SetMagic(magic_number))
+   if (!utils.LockMagic(magic_number)) {
       return(INIT_FAILED);
+   }
+
+   position.SetMagic(magic_number);
 
    volume = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
 
@@ -61,7 +64,7 @@ void OnDeinit(const int reason)
 //--- destroy timer
    EventKillTimer();
 
-   position.ReleaseMagic();
+   utils.UnlockMagic(position.GetMagic());
 
 }
 //+------------------------------------------------------------------+
@@ -71,13 +74,13 @@ void OnTick()
 {
    bars.SetInfo(4);
    position.UpdateInfo(bars.GetOne(0).time);
-   
+
    double lastDeal = SymbolInfoDouble(_Symbol, SYMBOL_LAST);
 
    MqlRates bar3 = bars.GetOne(3);
    MqlRates bar2 = bars.GetOne(2);
    MqlRates bar1 = bars.GetOne(1);
-   
+
    chart.SetSLTP(position.GetSL(), position.GetTP());
 
    bool canGoLong = false;
@@ -89,7 +92,7 @@ void OnTick()
       if(position.GetBarsDuration() == 4) {
          position.SetBreakevenSLTP();
       }
-      
+
       position.CloseIfSLTP(lastDeal);
 
    } else {

@@ -10,9 +10,11 @@ class CMyUtils
 private:
 
 public:
-   CMyUtils(void);
+                     CMyUtils(void);
    ulong             StringToMagic(string pStringVar);
    bool              IsValidExpertName(string pExpertName);
+   bool              LockMagic(ulong pMagic);
+   bool              UnlockMagic(ulong pMagic);
    double            AdjustToTick(double pValue);
    double            GetAsk();
 };
@@ -54,16 +56,46 @@ bool CMyUtils::IsValidExpertName(string pExpertName)
    string name = pExpertName;
    StringTrimLeft(name);
    StringTrimRight(name);
-   
+
    if(name == NULL || name == "") {
       Print("ERROR - Null/Empty Expert name.");
       return(false);
    }
-      
+
    else {
-      Print("OK - EA name is valid to be converted to a magic number.");      
+      Print("OK - EA name is valid to be converted to a magic number.");
       return(true);
    }
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool CMyUtils::LockMagic(ulong pMagic)
+{
+   if(!GlobalVariableCheck((string)pMagic)) {
+      PrintFormat("INFO - Registering %u magic number", pMagic);
+      GlobalVariableSet((string)pMagic, 0.00);
+      return(true);
+   }
+
+   else {
+      PrintFormat("ERROR - EA Magic Number already in use");
+      return(false);
+   }
+}
+//+------------------------------------------------------------------+
+//| Release Magic Number                                             |
+//+------------------------------------------------------------------+
+bool CMyUtils::UnlockMagic(ulong pMagic)
+{
+   bool success = GlobalVariableDel((string)pMagic);
+   if(success) {
+      PrintFormat("INFO - Releasing %u magic number", pMagic);
+   } else {
+      PrintFormat("WARN - Error releasing %u magic number", pMagic);
+   }
+
+   return(success);
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -71,7 +103,7 @@ bool CMyUtils::IsValidExpertName(string pExpertName)
 double CMyUtils::AdjustToTick(double pValue)
 {
    double tickSize = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
-   //double tickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
+//double tickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
    double adjusted = NormalizeDouble((MathFloor(pValue / tickSize) * tickSize), _Digits);
    return(adjusted);
 };
@@ -81,8 +113,9 @@ double CMyUtils::AdjustToTick(double pValue)
 double CMyUtils::GetAsk(void)
 {
    MqlTick tick = {};
-   
+
    return(SymbolInfoDouble(_Symbol, SYMBOL_ASK));
 }
 //+------------------------------------------------------------------+
 
+//+------------------------------------------------------------------+
