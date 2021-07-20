@@ -68,6 +68,7 @@ int OnInit()
    volume = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
    
    bbHandle = iBands(_Symbol, PERIOD_CURRENT, inpMAPeriod, 0, inpDeviation, PRICE_CLOSE);
+   ChartIndicatorAdd(0, 0, bbHandle);
 
    ArraySetAsSeries(bbUpper, true);
    ArraySetAsSeries(bbLower, true);   

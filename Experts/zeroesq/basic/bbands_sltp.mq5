@@ -65,12 +65,13 @@ int OnInit()
    ulong magic_number = utils.StringToMagic(inpExpertName);
    if (!utils.LockMagic(magic_number))
       return(INIT_FAILED);
-      
-   position.SetMagic(magic_number);      
+
+   position.SetMagic(magic_number);
 
    volume = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
 
    bbHandle = iBands(_Symbol, PERIOD_CURRENT, inpMAPeriod, 0, inpDeviation, PRICE_CLOSE);
+   ChartIndicatorAdd(0, 0, bbHandle);
 
    ArraySetAsSeries(bbUpper, true);
    ArraySetAsSeries(bbLower, true);
@@ -98,8 +99,10 @@ void OnTick()
    position.Update(bars.GetOne(0).time);
    double lastDeal = SymbolInfoDouble(_Symbol, SYMBOL_LAST);
 
+   chart.SetSLTP(position.GetSL(), position.GetTP());
+
    double lastClose = bars.GetOne(1).close;
-   
+
    CopyBuffer(bbHandle, 1, 0, 10, bbUpper);
    CopyBuffer(bbHandle, 2, 0, 10, bbLower);
 
@@ -115,15 +118,15 @@ void OnTick()
 
    } else {                         //---flat
       double sl, tp;
-      if(canGoLong && inpDirection != SHORT_ONLY && bars.IsNewBar()){
-         sl = bars.GetOne(0).open - (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE)*inpSLTicks);
-         tp = bars.GetOne(0).open + (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE)*inpTPTicks);
+      if(canGoLong && inpDirection != SHORT_ONLY && bars.IsNewBar()) {
+         sl = bars.GetOne(0).open - (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE) * inpSLTicks);
+         tp = bars.GetOne(0).open + (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE) * inpTPTicks);
          position.OpenAtMarket(POSITION_TYPE_BUY, volume, sl, tp);
       }
 
-      if(canGoShort && inpDirection != LONG_ONLY && bars.IsNewBar()){
-         sl = bars.GetOne(0).open + (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE)*inpSLTicks);
-         tp = bars.GetOne(0).open - (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE)*inpTPTicks);      
+      if(canGoShort && inpDirection != LONG_ONLY && bars.IsNewBar()) {
+         sl = bars.GetOne(0).open + (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE) * inpSLTicks);
+         tp = bars.GetOne(0).open - (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE) * inpTPTicks);
          position.OpenAtMarket(POSITION_TYPE_SELL, volume, sl, tp);
       }
    }
