@@ -7,12 +7,11 @@
 #property link      "twitter.com/gabriel_guedes"
 #property version   "1.00"
 
-#include <zeroesq\MyTrade.mqh>
 #include <zeroesq\MyPosition.mqh>
 #include <zeroesq\MyPriceBars.mqh>
-#include <zeroesq\MyPending.mqh>
 #include <zeroesq\MyUtils.mqh>
 #include <zeroesq\MyReport.mqh>
+#include <zeroesq\MyChart.mqh>
 
 enum myenum_directions
 {
@@ -34,11 +33,10 @@ input myenum_directions inpDirection = BOTH;
 //| My Basic Objects                                                 |
 //+------------------------------------------------------------------+
 CMyPosition position;
-CMyTrade    trade;
 CMyBars     bars;
-CMyPending  pending;
 CMyUtils    utils;
 CMyReport   report;
+CMyChart    chart;
 //+------------------------------------------------------------------+
 //| Indicator handles and buffers                                    |
 //+------------------------------------------------------------------+
@@ -55,14 +53,6 @@ double expectedRange = 0.00;
 //+------------------------------------------------------------------+
 int OnInit()
 {
-   int atrHandle = INVALID_HANDLE;
-   atrHandle = iATR(_Symbol, PERIOD_D1, 20);
-
-   double atr[];
-   ArraySetAsSeries(atr, true);
-   CopyBuffer(atrHandle, 0, 1, 1, atr);
-   expectedRange = atr[0];
-
    report.SetStartTime();
 
    if(!utils.IsValidExpertName(inpExpertName)) {
@@ -70,10 +60,20 @@ int OnInit()
    }
 
    ulong magic_number = utils.StringToMagic(inpExpertName);
-   if (!trade.SetMagicNumber(magic_number))
+   if (!utils.LockMagic(magic_number))
       return(INIT_FAILED);
+      
+   position.SetMagic(magic_number);      
 
    volume = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+   
+   int atrHandle = INVALID_HANDLE;
+   atrHandle = iATR(_Symbol, PERIOD_D1, 20);
+
+   double atr[];
+   ArraySetAsSeries(atr, true);
+   CopyBuffer(atrHandle, 0, 1, 1, atr);
+   expectedRange = atr[0];   
 
    return(INIT_SUCCEEDED);
 
@@ -86,7 +86,7 @@ void OnDeinit(const int reason)
 //--- destroy timer
    EventKillTimer();
 
-   trade.ReleaseMagicNumber();
+   utils.UnlockMagic(position.GetMagic());
 
 }
 //+------------------------------------------------------------------+
@@ -95,10 +95,8 @@ void OnDeinit(const int reason)
 void OnTick()
 {
    bars.SetInfo(10);
-   position.UpdateInfo(trade.GetMagic(), bars.GetOne(0).time);
-
-   //if(bars.IsNewBar())
-   //   Print(position.GetBarsDuration());
+   position.Update(bars.GetOne(0).time);
+   double lastDeal = SymbolInfoDouble(_Symbol, SYMBOL_LAST);   
 
    bool goLong = false, goShort = false;
    double lastClose = bars.GetOne(1).close;
@@ -117,15 +115,18 @@ void OnTick()
    if(position.IsOpen()) {          //---positioned
       if((position.GetType() == POSITION_TYPE_BUY && goShort) || ( position.GetType() == POSITION_TYPE_SELL && goLong))
          if(inpDirection == BOTH)
-            trade.Reverse(position.GetType(), position.GetVolume());
+            position.Reverse();
          else
-            trade.Close();
+            position.Close();
+
 
    } else {                         //---flat
       if(goLong && inpDirection != SHORT_ONLY)
-         trade.BuyMarket(volume);
+         position.OpenAtMarket(POSITION_TYPE_BUY, volume, 0.00, 0.00);
+         //trade.BuyMarket(volume);
       if(goShort && inpDirection != LONG_ONLY)
-         trade.SellMarket(volume);
+         position.OpenAtMarket(POSITION_TYPE_SELL, volume, 0.00, 0.00);
+         //trade.SellMarket(volume);
 
    }
 
@@ -162,7 +163,7 @@ double OnTester()
 {
    double ret = 0.0;
    report.SetEndTime();
-   report.SetDeals(trade.GetMagic(), 0, TimeCurrent());
+   report.SetDeals(position.GetMagic(), 0, TimeCurrent());
    //report.SaveDealsToCSV();
 
    return(ret);

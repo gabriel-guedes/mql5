@@ -7,12 +7,11 @@
 #property link      "twitter.com/gabriel_guedes"
 #property version   "1.00"
 
-//#include <zeroesq\MyTrade.mqh>
 #include <zeroesq\MyPosition.mqh>
 #include <zeroesq\MyPriceBars.mqh>
-//#include <zeroesq\MyPending.mqh>
 #include <zeroesq\MyUtils.mqh>
 #include <zeroesq\MyReport.mqh>
+#include <zeroesq\MyChart.mqh>
 
 enum myenum_directions
 {
@@ -34,11 +33,10 @@ input myenum_directions inpDirection = BOTH;       //Trade Direction
 //| My Basic Objects                                                 |
 //+------------------------------------------------------------------+
 CMyPosition position;
-//CMyTrade    trade;
 CMyBars     bars;
-//CMyPending  pending;
 CMyUtils    utils;
 CMyReport   report;
+CMyChart    chart;
 //+------------------------------------------------------------------+
 //| Indicator handles and buffers                                    |
 //+------------------------------------------------------------------+
@@ -55,11 +53,6 @@ double volume = 0.00;
 //+------------------------------------------------------------------+
 int OnInit()
 {
-   bbHandle = iBands(_Symbol, PERIOD_CURRENT, inpMAPeriod, 0, inpDeviation, PRICE_CLOSE);
-
-   ArraySetAsSeries(bbUpper, true);
-   ArraySetAsSeries(bbLower, true);
-
    report.SetStartTime();
 
    if(!utils.IsValidExpertName(inpExpertName)) {
@@ -67,10 +60,17 @@ int OnInit()
    }
 
    ulong magic_number = utils.StringToMagic(inpExpertName);
-   if (!position.SetMagic(magic_number))
+   if (!utils.LockMagic(magic_number))
       return(INIT_FAILED);
 
+   position.SetMagic(magic_number);
+
    volume = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+   
+   bbHandle = iBands(_Symbol, PERIOD_CURRENT, inpMAPeriod, 0, inpDeviation, PRICE_CLOSE);
+
+   ArraySetAsSeries(bbUpper, true);
+   ArraySetAsSeries(bbLower, true);   
 
    return(INIT_SUCCEEDED);
 
@@ -83,7 +83,7 @@ void OnDeinit(const int reason)
 //--- destroy timer
    EventKillTimer();
 
-   position.ReleaseMagic();
+   utils.UnlockMagic(position.GetMagic());
 
 }
 //+------------------------------------------------------------------+
@@ -92,10 +92,7 @@ void OnDeinit(const int reason)
 void OnTick()
 {
    bars.SetInfo(10);
-   position.UpdateInfo(bars.GetOne(0).time);
-
-//if(bars.IsNewBar())
-//   Print(position.GetBarsDuration());
+   position.Update(bars.GetOne(0).time);
 
    double lastClose = bars.GetOne(1).close;
    

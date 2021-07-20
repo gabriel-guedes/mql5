@@ -73,7 +73,7 @@ void OnDeinit(const int reason)
 void OnTick()
 {
    bars.SetInfo(4);
-   position.UpdateInfo(bars.GetOne(0).time);
+   position.Update(bars.GetOne(0).time);
 
    double lastDeal = SymbolInfoDouble(_Symbol, SYMBOL_LAST);
 

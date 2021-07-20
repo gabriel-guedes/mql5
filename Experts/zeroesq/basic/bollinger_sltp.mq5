@@ -10,9 +10,9 @@
 #include <zeroesq\MyTrade.mqh>
 #include <zeroesq\MyPosition.mqh>
 #include <zeroesq\MyPriceBars.mqh>
-#include <zeroesq\MyPending.mqh>
 #include <zeroesq\MyUtils.mqh>
 #include <zeroesq\MyReport.mqh>
+#include <zeroesq\MyChart.mqh>
 
 enum myenum_directions
 {
@@ -36,11 +36,10 @@ input uint     inpTPTicks = 300;                   //TP Ticks
 //| My Basic Objects                                                 |
 //+------------------------------------------------------------------+
 CMyPosition position;
-CMyTrade    trade;
 CMyBars     bars;
-CMyPending  pending;
 CMyUtils    utils;
 CMyReport   report;
+CMyChart    chart;
 //+------------------------------------------------------------------+
 //| Indicator handles and buffers                                    |
 //+------------------------------------------------------------------+
@@ -57,11 +56,6 @@ double volume = 0.00;
 //+------------------------------------------------------------------+
 int OnInit()
 {
-   bbHandle = iBands(_Symbol, PERIOD_CURRENT, inpMAPeriod, 0, inpDeviation, PRICE_CLOSE);
-
-   ArraySetAsSeries(bbUpper, true);
-   ArraySetAsSeries(bbLower, true);
-
    report.SetStartTime();
 
    if(!utils.IsValidExpertName(inpExpertName)) {
@@ -69,10 +63,17 @@ int OnInit()
    }
 
    ulong magic_number = utils.StringToMagic(inpExpertName);
-   if (!trade.SetMagicNumber(magic_number))
+   if (!utils.LockMagic(magic_number))
       return(INIT_FAILED);
+      
+   position.SetMagic(magic_number);      
 
    volume = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+
+   bbHandle = iBands(_Symbol, PERIOD_CURRENT, inpMAPeriod, 0, inpDeviation, PRICE_CLOSE);
+
+   ArraySetAsSeries(bbUpper, true);
+   ArraySetAsSeries(bbLower, true);
 
    return(INIT_SUCCEEDED);
 
@@ -85,7 +86,7 @@ void OnDeinit(const int reason)
 //--- destroy timer
    EventKillTimer();
 
-   trade.ReleaseMagicNumber();
+   utils.UnlockMagic(position.GetMagic());
 
 }
 //+------------------------------------------------------------------+
@@ -94,10 +95,8 @@ void OnDeinit(const int reason)
 void OnTick()
 {
    bars.SetInfo(10);
-   position.UpdateInfo(trade.GetMagic(), bars.GetOne(0).time);
-
-//if(bars.IsNewBar())
-//   Print(position.GetBarsDuration());
+   position.Update(bars.GetOne(0).time);
+   double lastDeal = SymbolInfoDouble(_Symbol, SYMBOL_LAST);
 
    double lastClose = bars.GetOne(1).close;
    
@@ -112,21 +111,20 @@ void OnTick()
       canGoShort = true;
 
    if(position.IsOpen()) {          //---positioned
-      //do nothing, let SL/TP handle the situation
-      return;
+      position.CloseIfSLTP(lastDeal);
 
    } else {                         //---flat
       double sl, tp;
       if(canGoLong && inpDirection != SHORT_ONLY && bars.IsNewBar()){
          sl = bars.GetOne(0).open - (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE)*inpSLTicks);
          tp = bars.GetOne(0).open + (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE)*inpTPTicks);
-         trade.BuyMarket(volume, sl, tp);
+         position.OpenAtMarket(POSITION_TYPE_BUY, volume, sl, tp);
       }
 
       if(canGoShort && inpDirection != LONG_ONLY && bars.IsNewBar()){
          sl = bars.GetOne(0).open + (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE)*inpSLTicks);
          tp = bars.GetOne(0).open - (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE)*inpTPTicks);      
-         trade.SellMarket(volume, sl, tp);
+         position.OpenAtMarket(POSITION_TYPE_SELL, volume, sl, tp);
       }
    }
 
@@ -163,7 +161,7 @@ double OnTester()
 {
    double ret = 0.0;
    report.SetEndTime();
-   report.SetDeals(trade.GetMagic(), 0, TimeCurrent());
+   report.SetDeals(position.GetMagic(), 0, TimeCurrent());
 //report.SaveDealsToCSV();
 
    return(ret);
