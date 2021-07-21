@@ -26,6 +26,7 @@ enum myenum_directions
 input string   inpExpertName = "bollinger";        //Expert Name
 input uint     inpMAPeriod = 21;                   //MA Period
 input double   inpDeviation = 2;                   //Standard Deviations
+input uint     inpCloseAfter = 4;                  //Close After N Bars
 input myenum_directions inpDirection = BOTH;       //Trade Direction
 
 
@@ -108,7 +109,7 @@ void OnTick()
       canGoShort = true;
 
    if(position.IsOpen()) {          //---positioned
-      if(position.GetBarsDuration() >= 4)
+      if(position.GetBarsDuration() >= inpCloseAfter)
          position.Close();
 
    } else {                         //---flat
