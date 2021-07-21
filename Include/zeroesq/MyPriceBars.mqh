@@ -47,8 +47,8 @@ void CMyBars::SetInfo(int pBarsCount)
 {
    int barsTo = 2;
 
-   if(pBarsCount > barsTo)
-      barsTo = pBarsCount;
+   if(pBarsCount >= barsTo)
+      barsTo = pBarsCount+1;
 
    CopyRates(_Symbol, PERIOD_CURRENT, 0, barsTo, mBars);
 
