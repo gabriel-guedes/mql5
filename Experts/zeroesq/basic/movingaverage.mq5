@@ -112,9 +112,9 @@ void OnTick()
 
    } else {                         //---flat
       if(canGoLong && inpDirection != SHORT_ONLY)
-         position.OpenAtMarket(POSITION_TYPE_BUY, volume, 0.00, 0.00);
+         position.BuyMarket(volume, 0.00, 0.00);
       if(canGoShort && inpDirection != LONG_ONLY)
-         position.OpenAtMarket(POSITION_TYPE_SELL, volume, 0.00, 0.00);
+         position.SellMarket(volume, 0.00, 0.00);
 
    }
 

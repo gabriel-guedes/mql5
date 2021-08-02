@@ -121,13 +121,13 @@ void OnTick()
       if(canGoLong && inpDirection != SHORT_ONLY && bars.IsNewBar()) {
          sl = bars.GetOne(0).open - (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE) * inpSLTicks);
          tp = bars.GetOne(0).open + (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE) * inpTPTicks);
-         position.OpenAtMarket(POSITION_TYPE_BUY, volume, sl, tp);
+         position.BuyMarket(volume, sl, tp);
       }
 
       if(canGoShort && inpDirection != LONG_ONLY && bars.IsNewBar()) {
          sl = bars.GetOne(0).open + (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE) * inpSLTicks);
          tp = bars.GetOne(0).open - (SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE) * inpTPTicks);
-         position.OpenAtMarket(POSITION_TYPE_SELL, volume, sl, tp);
+         position.SellMarket(volume, sl, tp);
       }
    }
 

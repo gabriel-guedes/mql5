@@ -102,7 +102,7 @@ void OnTick()
          double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
          tp = utils.AdjustToTick(ask + 1500);
          sl = utils.AdjustToTick(ask - 3500);
-         position.OpenAtMarket(POSITION_TYPE_BUY, volume, sl, tp);
+         position.BuyMarket(volume, sl, tp);
       }
    }
 }

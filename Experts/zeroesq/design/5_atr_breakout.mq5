@@ -116,8 +116,8 @@ void OnTick()
    } 
 
    else {                         //---flat
-      if(lastDeal >= longPrice) position.OpenAtMarket(POSITION_TYPE_BUY, volume, 0, 0);
-      else if(lastDeal <= shortPrice) position.OpenAtMarket(POSITION_TYPE_SELL, volume, 0.00, 0.00);
+      if(lastDeal >= longPrice) position.BuyMarket(volume, 0.00, 0.00);
+      else if(lastDeal <= shortPrice) position.SellMarket(volume, 0.00, 0.00);
    }
 
 }
