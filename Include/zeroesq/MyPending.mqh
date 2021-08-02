@@ -60,7 +60,9 @@ void CMyPending::CMyPending()
 {
 }
 
-//OrderCount
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 void CMyPending::OrderCount(string pSymbol)
 {
   BuyLimitCount = 0; 
@@ -178,63 +180,81 @@ bool CMyPending::DeleteOrder(ulong pTicket, ulong pMagic)
    return(OrderSend(request, result));
 }
 
-//BuyLimit
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 int CMyPending::BuyLimit(string pSymbol) 
 { 
   OrderCount(pSymbol); 
   return(BuyLimitCount); 
 }
 
-//SellLimit
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 int CMyPending::SellLimit(string pSymbol) 
 { 
   OrderCount(pSymbol); 
   return(SellLimitCount); 
 }
 
-//BuyStop
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 int CMyPending::BuyStop(string pSymbol) 
 { 
   OrderCount(pSymbol); 
   return(BuyStopCount); 
 }  
 
-//SellStop
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 int CMyPending::SellStop(string pSymbol) 
 { 
   OrderCount(pSymbol); 
   return(SellStopCount); 
 }  
 
-//BuyStopLimit
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 int CMyPending::BuyStopLimit(string pSymbol) 
 { 
   OrderCount(pSymbol); 
   return(BuyStopLimitCount); 
 }  
 
-//SellStopLimit
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 int CMyPending::SellStopLimit(string pSymbol) 
 { 
   OrderCount(pSymbol); 
   return(SellStopLimitCount); 
 }  
 
-//Total Pending 
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 int CMyPending::TotalPending(string pSymbol)
 {
 	OrderCount(pSymbol);
 	return(TotalPendingCount);
 }
 
-//GetTickets
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 void CMyPending::GetTickets(string pSymbol,ulong &pTickets[])
 {
   OrderCount(pSymbol);
   ArrayCopy(pTickets,PendingTickets);
   return;
 }
-//GetTickets by Magic
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 void CMyPending::GetTicketsByMagic(ulong &pTickets[])
 {
   OrderCount(_Symbol);
