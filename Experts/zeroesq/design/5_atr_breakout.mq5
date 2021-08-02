@@ -68,9 +68,9 @@ int OnInit()
    position.SetMagic(magic_number);
 
    volume = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
-   
+
    atrHandle = iATR(_Symbol, PERIOD_CURRENT, inpATRPeriod);
-   ArraySetAsSeries(atr, true);   
+   ArraySetAsSeries(atr, true);
 
    return(INIT_SUCCEEDED);
 
@@ -96,28 +96,30 @@ void OnTick()
 
    double lastClose = bars.GetOne(1).close;
    double lastDeal = SymbolInfoDouble(_Symbol, SYMBOL_LAST);
-   
+
    CopyBuffer(atrHandle, 0, 0, 2, atr);
 
    double shortPrice = 0.00, longPrice = 0.00;
-   
-   longPrice = utils.AdjustToTick(lastClose + (atr[1]*inpMult));
-   shortPrice = utils.AdjustToTick(lastClose - (atr[1]*inpMult));
-   
+
+   longPrice = utils.AdjustToTick(lastClose + (atr[1] * inpMult));
+   shortPrice = utils.AdjustToTick(lastClose - (atr[1] * inpMult));
+
    chart.SetBuyStop(longPrice);
    chart.SetSellStop(shortPrice);
-   
-        
+
+
    if(position.IsLong()) {          //---positioned LONG
-      if(lastDeal <= shortPrice) position.Reverse();
+      if(lastDeal <= shortPrice && inpDirection == BOTH) position.Reverse();
+      else if(lastDeal <= shortPrice && inpDirection == LONG_ONLY) position.Close();
+   
+   } else if(position.IsShort()) {  //---positioned SHORT
+      if(lastDeal >= longPrice && inpDirection == BOTH) position.Reverse();
+      else if(lastDeal >= longPrice && inpDirection == SHORT_ONLY) position.Close();
    }
-   else if(position.IsShort()) {    //---positioned SHORT
-      if(lastDeal >= longPrice) position.Reverse();
-   } 
 
    else {                         //---flat
-      if(lastDeal >= longPrice) position.BuyMarket(volume, 0.00, 0.00);
-      else if(lastDeal <= shortPrice) position.SellMarket(volume, 0.00, 0.00);
+      if(lastDeal >= longPrice && inpDirection != SHORT_ONLY) position.BuyMarket(volume, 0.00, 0.00);
+      else if(lastDeal <= shortPrice && inpDirection != LONG_ONLY) position.SellMarket(volume, 0.00, 0.00);
    }
 
 }
