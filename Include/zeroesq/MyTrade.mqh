@@ -14,7 +14,6 @@ class CMyTrade
 private:
    ENUM_ORDER_TYPE_FILLING mFillType;
    ulong             mDeviation;
-   //ulong             mMagic;
    bool              OpenPosition(ENUM_ORDER_TYPE pType, ulong pMagic, double pVolume, double pStop = 0.00000, double pProfit = 0.00000, string pComment = NULL);
    bool              OpenPending(ENUM_ORDER_TYPE pType, ulong pMagic, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, double pStoplimit = 0, datetime pExpiration = 0, string pComment = NULL);
    bool              SendAndCheckOrder(MqlTradeRequest &pRequest);
@@ -25,7 +24,6 @@ private:
 
 public:
                      CMyTrade(void);
-   //void              ReleaseMagicNumber();
    void              SetDeviation(ulong pDeviation);
    void              SetFillType(ENUM_ORDER_TYPE_FILLING pFilltype);
    ulong             GetMagic();
@@ -39,7 +37,6 @@ public:
    bool              SellStopLimit(ulong pMagic, double pVolume, double pPrice, double pStop = 0, double pProfit = 0, datetime pExpiration = 0, string pComment = NULL);
    bool              Close( ulong pMagic, double pVolume = 0, string pComment = NULL);
    bool              Reverse(long pOpenPositionType, long pMagic, double pVolume, string pComment = NULL);
-   //bool              RemoveOrder(ulong pTicket);
 };
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
@@ -49,14 +46,6 @@ void CMyTrade::CMyTrade(void)
    mDeviation = 50;
    mFillType = ORDER_FILLING_IOC;
 }
-//+------------------------------------------------------------------+
-//| Release Magic Number                                             |
-//+------------------------------------------------------------------+
-//void CMyTrade::ReleaseMagicNumber(void)
-//{
-//   GlobalVariableDel((string)mMagic);
-//}
-
 //+------------------------------------------------------------------+
 //| Set Deviation                                                    |
 //+------------------------------------------------------------------+
@@ -71,13 +60,6 @@ void CMyTrade::SetFillType(ENUM_ORDER_TYPE_FILLING pFilltype)
 {
    mFillType = pFilltype;
 }
-////+------------------------------------------------------------------+
-////|                                                                  |
-////+------------------------------------------------------------------+
-//ulong CMyTrade::GetMagic(void)
-//{
-//   return mMagic;
-//}
 //+------------------------------------------------------------------+
 //| Open Position                                                    |
 //+------------------------------------------------------------------+
