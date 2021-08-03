@@ -16,6 +16,7 @@ public:
    bool              LockMagic(ulong pMagic);
    bool              UnlockMagic(ulong pMagic);
    double            AdjustToTick(double pValue);
+   int               GetDayOfWeek(datetime pDate);
    double            GetAsk();
 };
 //+------------------------------------------------------------------+
@@ -117,5 +118,14 @@ double CMyUtils::GetAsk(void)
    return(SymbolInfoDouble(_Symbol, SYMBOL_ASK));
 }
 //+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int CMyUtils::GetDayOfWeek(datetime pDate)
+{
+   MqlDateTime date;
+   TimeToStruct(pDate, date);
+   
+   return(date.day_of_week);
+}
 
 //+------------------------------------------------------------------+
