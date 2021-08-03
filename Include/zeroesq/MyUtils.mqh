@@ -18,6 +18,8 @@ public:
    double            AdjustToTick(double pValue);
    int               GetDayOfWeek(datetime pDate);
    double            GetAsk();
+   bool              CrossAbove(double &a[], double &b[]);
+   bool              CrossBelow(double &a[], double &b[]);
 };
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
@@ -127,5 +129,37 @@ int CMyUtils::GetDayOfWeek(datetime pDate)
    
    return(date.day_of_week);
 }
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool CMyUtils::CrossAbove(double &a[],double &b[])
+{
+   if(ArraySize(a) < 2 || ArraySize(b) < 2) {
+      Print("ERROR - Insuficient array size for crossing check");
+      return(false);
+   }
+   
+   if(a[1] < b[1] && a[0] > b[0]) {
+      return(true);
+   }
+   
+   return(false);
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool CMyUtils::CrossBelow(double &a[],double &b[])
+{
+   if(ArraySize(a) > 2 || ArraySize(b) > 2) {
+      Print("ERROR - Insuficient array size for crossing check");
+      return(false);
+   }
+   
+   if(a[1] > b[1] && a[0] < b[0]) {
+      return(true);
+   }
+   
+   return(false);
+   
+}
 //+------------------------------------------------------------------+
