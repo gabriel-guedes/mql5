@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                               5_atr_breakout.mq5 |
+//|                                       13_ma_cross_with_twist.mq5 |
 //|                                           Gabriel Guedes de Sena |
 //|                                       twitter.com/gabriel_guedes |
 //+------------------------------------------------------------------+
@@ -23,9 +23,10 @@ enum myenum_directions
 //+------------------------------------------------------------------+
 //| Inputs                                                           |
 //+------------------------------------------------------------------+
-input string   inpExpertName = "5_atr_breakout";   //Expert Name
-input uint     inpATRPeriod = 15;                  //ATR Period
-input double   inpMult = 1.0;                      //ATR Multiplier
+input string   inpExpertName = "13_ma_cross_with_twist";   //Expert Name
+input int      inpShortMAPeriod  = 10;                     //Short MA Period
+input int      inpLongMAPeriod   = 20;                     //Long  MA Period
+input double   inpMaxPctDeviation = 3.0;                   //Max % Deviation
 input myenum_directions inpDirection = BOTH;
 
 
@@ -40,9 +41,8 @@ CMyChart    chart;
 //+------------------------------------------------------------------+
 //| Indicator handles and buffers                                    |
 //+------------------------------------------------------------------+
-int atrHandle = INVALID_HANDLE;
-double atr[];
-
+int shortMAHandle, longMAHandle;
+double shortMA[], longMA[];
 //+------------------------------------------------------------------+
 //| Global Variables                                                 |
 //+------------------------------------------------------------------+
@@ -67,8 +67,10 @@ int OnInit()
 
    volume = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
 
-   atrHandle = iATR(_Symbol, PERIOD_CURRENT, inpATRPeriod);
-   ArraySetAsSeries(atr, true);
+   shortMAHandle = iMA(_Symbol, PERIOD_CURRENT, inpShortMAPeriod, 0, MODE_EMA, PRICE_CLOSE);
+   longMAHandle = iMA(_Symbol, PERIOD_CURRENT, inpLongMAPeriod, 0, MODE_EMA, PRICE_CLOSE);
+   ArraySetAsSeries(shortMA, true);
+   ArraySetAsSeries(longMA, true);
 
    return(INIT_SUCCEEDED);
 
@@ -89,35 +91,50 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
 {
-   bars.SetInfo(2);
+   bars.SetInfo(3);
    position.Update(bars.GetOne(0).time);
 
-   double lastClose = bars.GetOne(1).close;
-   double lastDeal = SymbolInfoDouble(_Symbol, SYMBOL_LAST);
+   CopyBuffer(shortMAHandle, 0, 1, 2, shortMA);
+   CopyBuffer(longMAHandle, 0, 1, 2, longMA);
 
-   CopyBuffer(atrHandle, 0, 0, 2, atr);
+   MqlRates bar1 = bars.GetOne(1);
 
-   double shortPrice = 0.00, longPrice = 0.00;
+   bool goLong = false, goShort = false;
+   double buyThreshold = bar1.low + (bar1.low*inpMaxPctDeviation/100);
+   double sellThreshold = bar1.high - (bar1.high*inpMaxPctDeviation/100);
+   
+   chart.SetBuyStop(buyThreshold);
+   chart.SetSellStop(sellThreshold);
 
-   longPrice = utils.AdjustToTick(lastClose + (atr[1] * inpMult));
-   shortPrice = utils.AdjustToTick(lastClose - (atr[1] * inpMult));
+   if(utils.CrossAbove(shortMA, longMA) && bar1.close < buyThreshold) {
+      goLong = true;
 
-   chart.SetBuyStop(longPrice);
-   chart.SetSellStop(shortPrice);
+   } else if(utils.CrossBelow(shortMA, longMA) && bar1.close > sellThreshold) {
+      goShort = true;
+   }
 
 
    if(position.IsLong()) {          //---positioned LONG
-      if(lastDeal <= shortPrice && inpDirection == BOTH) position.Reverse();
-      else if(lastDeal <= shortPrice && inpDirection == LONG_ONLY) position.Close();
-   
+      if(goShort && inpDirection == BOTH) {
+         position.Reverse();
+      } else if(goShort && inpDirection == LONG_ONLY) {
+         position.Close();
+      }
+
    } else if(position.IsShort()) {  //---positioned SHORT
-      if(lastDeal >= longPrice && inpDirection == BOTH) position.Reverse();
-      else if(lastDeal >= longPrice && inpDirection == SHORT_ONLY) position.Close();
+      if(goLong && inpDirection == BOTH) {
+         position.Reverse();
+      } else if(goLong && inpDirection == SHORT_ONLY) {
+         position.Close();
+      }
    }
 
    else {                         //---flat
-      if(lastDeal >= longPrice && inpDirection != SHORT_ONLY) position.BuyMarket(volume, 0.00, 0.00);
-      else if(lastDeal <= shortPrice && inpDirection != LONG_ONLY) position.SellMarket(volume, 0.00, 0.00);
+      if(goLong && inpDirection != SHORT_ONLY) {
+         position.BuyMarket(volume, 0.00, 0.00);
+      } else if(goShort && inpDirection != LONG_ONLY) {
+         position.SellMarket(volume, 0.00, 0.00);
+      }
    }
 
 }
@@ -154,7 +171,7 @@ double OnTester()
    double ret = 0.0;
    report.SetEndTime();
    report.SetDeals(position.GetMagic(), 0, TimeCurrent());
-   //report.SaveDealsToCSV();
+//report.SaveDealsToCSV();
 
    return(ret);
 }
