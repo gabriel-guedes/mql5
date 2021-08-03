@@ -93,10 +93,6 @@ void OnTick()
    double open_profit = position.GetProfit();
    double max_profit = position.GetMaxProfit();
    
-   if(bars.IsNewBar()) {
-      int i = 1;
-   }   
-   
    bool goLong = false, goShort = false;
    
    if(close1 > close2) {
