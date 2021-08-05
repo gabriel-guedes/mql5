@@ -20,6 +20,8 @@ public:
    double            GetAsk();
    bool              CrossAbove(double &a[], double &b[]);
    bool              CrossBelow(double &a[], double &b[]);
+   bool              SlopeTurnUp(double &vals[]);
+   bool              SlopeTurnDown(double &vals[]);
 };
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
@@ -161,5 +163,37 @@ bool CMyUtils::CrossBelow(double &a[],double &b[])
    
    return(false);
    
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool CMyUtils::SlopeTurnUp(double &vals[])
+{
+   if(ArraySize(vals) < 3) {
+      Print("ERROR - Slope Turnover at least size 3 array needed");
+      return(false);
+   }
+   
+   if(vals[1] - vals[2] < 0 && vals[0] - vals[1] > 0) {
+      return(true);
+   }
+   
+   return(false);
+}
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool CMyUtils::SlopeTurnDown(double &vals[])
+{
+   if(ArraySize(vals) < 3) {
+      Print("ERROR - Slope Turnover at least size 3 array needed");
+      return(false);
+   }
+   
+   if(vals[1] - vals[2] > 0 && vals[0] - vals[1] < 0) {
+      return(true);
+   }
+   
+   return(false);   
 }
 //+------------------------------------------------------------------+
