@@ -43,8 +43,8 @@ CMyChart    chart;
 //+------------------------------------------------------------------+
 //| Indicator handles and buffers                                    |
 //+------------------------------------------------------------------+
-int bands_handle, adx_handle, atr_handle;
-double base_line[], lower_band[], upper_band[], adx[], atr[];
+int bands_handle, adx_handle, atr_handle, pct_b_handle;
+double base_line[], lower_band[], upper_band[], adx[], di_plus[], di_minus[], atr[], pct_b[];
 //+------------------------------------------------------------------+
 //| Global Variables                                                 |
 //+------------------------------------------------------------------+
@@ -71,6 +71,9 @@ int OnInit()
 
    adx_handle = iADXWilder(_Symbol, PERIOD_CURRENT, 14);
    ArraySetAsSeries(adx, true);
+   ArraySetAsSeries(di_plus, true);
+   ArraySetAsSeries(di_minus, true);
+   
 
    bands_handle = iBands(_Symbol, PERIOD_CURRENT, inpMAPeriod, 0, inpStdev, PRICE_CLOSE);
    ArraySetAsSeries(base_line, true);
@@ -79,6 +82,11 @@ int OnInit()
    
    atr_handle = iATR(_Symbol, PERIOD_CURRENT, inpMAPeriod);
    ArraySetAsSeries(atr, true);
+   
+   pct_b_handle = iCustom(_Symbol, PERIOD_CURRENT, "zeroesq\\MyPercentB", inpMAPeriod, inpStdev, PRICE_CLOSE);
+   ArraySetAsSeries(pct_b, true);
+   
+   
 
    return(INIT_SUCCEEDED);
 
@@ -103,7 +111,10 @@ void OnTick()
    position.Update(bars.GetOne(0).time);
 
    CopyBuffer(adx_handle, 0, 1, 1, adx);
+   CopyBuffer(adx_handle, PLUSDI_LINE, 1, 1, di_plus);
+   CopyBuffer(adx_handle, MINUSDI_LINE, 1, 1, di_minus);
    CopyBuffer(atr_handle, 0, 0, 1, atr);
+   CopyBuffer(pct_b_handle, 0, 1, 1, pct_b);
    CopyBuffer(bands_handle, BASE_LINE, 1, 3, base_line);
    CopyBuffer(bands_handle, UPPER_BAND, 1, 3, upper_band);
    CopyBuffer(bands_handle, LOWER_BAND, 1, 3, lower_band);
@@ -111,7 +122,7 @@ void OnTick()
 
    double current_price = SymbolInfoDouble(_Symbol, SYMBOL_LAST);
    double last_close = bars.GetOne(1).close;
-   double pct_b = (last_close - lower_band[1]) / (upper_band[1] - lower_band[1]);
+   double B = (last_close - lower_band[0]) / (upper_band[0] - lower_band[0]);
    double limit_low = last_close - atr[0];
    double limit_high = last_close + atr[0];
    
@@ -123,14 +134,14 @@ void OnTick()
 
    bool goLong = false, goShort = false;
 
-   if(pct_b < inpOversold && current_price < limit_low) {
+   if(pct_b[0] < inpOversold && current_price < limit_low) {
       goLong = true;
 
-   } else if(pct_b > inpOverbought && current_price > limit_high) {
+   } else if(pct_b[0] > inpOverbought && current_price > limit_high) {
       goShort = true;
    }
 
-   if(pct_b < 0.5) {
+   if(pct_b[0] < 0.5) {
       chart.SetBuyLimit(limit_low);
       chart.SetSellLimit(0.00);
    }
