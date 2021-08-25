@@ -138,7 +138,7 @@ bool CMyUtils::CrossAbove(double &a[],double &b[])
 {
    if(ArraySize(a) < 2 || ArraySize(b) < 2) {
       Print("ERROR - Insuficient array size for crossing check");
-      return(false);
+      //return(false);
    }
    
    if(a[1] < b[1] && a[0] > b[0]) {
@@ -154,7 +154,7 @@ bool CMyUtils::CrossBelow(double &a[],double &b[])
 {
    if(ArraySize(a) > 2 || ArraySize(b) > 2) {
       Print("ERROR - Insuficient array size for crossing check");
-      return(false);
+      //return(false);
    }
    
    if(a[1] > b[1] && a[0] < b[0]) {
@@ -171,7 +171,7 @@ bool CMyUtils::SlopeTurnUp(double &vals[])
 {
    if(ArraySize(vals) < 3) {
       Print("ERROR - Slope Turnover at least size 3 array needed");
-      return(false);
+      //return(false);
    }
    
    if(vals[1] - vals[2] < 0 && vals[0] - vals[1] > 0) {
@@ -187,7 +187,7 @@ bool CMyUtils::SlopeTurnDown(double &vals[])
 {
    if(ArraySize(vals) < 3) {
       Print("ERROR - Slope Turnover at least size 3 array needed");
-      return(false);
+      //return(false);
    }
    
    if(vals[1] - vals[2] > 0 && vals[0] - vals[1] < 0) {
