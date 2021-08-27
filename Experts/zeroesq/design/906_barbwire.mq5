@@ -12,6 +12,7 @@
 #include <zeroesq\MyUtils.mqh>
 #include <zeroesq\MyReport.mqh>
 #include <zeroesq\MyChart.mqh>
+#include <zeroesq\MyConstraints.mqh>
 
 enum myenum_directions
 {
@@ -41,6 +42,7 @@ CMyBars     bars;
 CMyUtils    utils;
 CMyReport   report;
 CMyChart    chart;
+MyConstraints constraints;
 //+------------------------------------------------------------------+
 //| Indicator handles and buffers                                    |
 //+------------------------------------------------------------------+
@@ -67,6 +69,8 @@ int OnInit()
       return(INIT_FAILED);
 
    position.SetMagic(magic_number);
+   
+   constraints.SetDayTradeTime(9, 30, 17, 15);
 
    volume = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
 
@@ -129,7 +133,7 @@ void OnTick()
    
    if(inp_use_SLTP) StrategySLTP();
    
-   chart.SetSLTP(position.GetSL(), position.GetTP());   
+   chart.SetSLTP(position.GetSL(), position.GetTP()); 
 
    bool go_long = false, go_short = false; 
    bool di_check = (di_plus[0] < inp_di_limit && di_minus[0] < inp_di_limit);
@@ -149,6 +153,13 @@ void OnTick()
    if(position.CloseIfSLTP(current_price)) {
       Print("Out on SLTP");
       return;
+   }
+   
+   if(!constraints.DayTradeTimeCheck(bars.GetOne(0).time)) {
+      if(position.IsOpen()) {
+         position.Close(); 
+      }
+      return;      
    }
 
    if(position.IsOpen()) {                    //---positioned
