@@ -196,4 +196,22 @@ bool CMyUtils::SlopeTurnDown(double &vals[])
    
    return(false);   
 }
+
+
+//+------------------------------------------------------------------+
+//| Usefull enumerators                                              |
+//+------------------------------------------------------------------+
+enum myenum_directions
+{
+   LONG_ONLY,
+   SHORT_ONLY,
+   BOTH,
+};
+
+enum myenum_action
+{
+   GO_LONG,
+   GO_SHORT,
+   DO_NOTHING,
+};
 //+------------------------------------------------------------------+
