@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                 906_barbwire.mq5 |
+//|                                        906_barbwire_reloaded.mq5 |
 //|                                           Gabriel Guedes de Sena |
 //|                                       twitter.com/gabriel_guedes |
 //+------------------------------------------------------------------+
@@ -24,7 +24,7 @@ enum myenum_directions
 //+------------------------------------------------------------------+
 //| Inputs                                                           |
 //+------------------------------------------------------------------+
-input string   inp_expert_name = "906_barbwire";            //Expert Name
+input string   inp_expert_name = "906_barbwire_reloaded";   //Expert Name
 input uint     inp_ma_period = 20;                          //MA Period
 input double   inp_deviation = 2;                           //Standard Deviation
 input double   inp_buy_level = 0.6;                         //%B for buying
