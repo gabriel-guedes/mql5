@@ -6,37 +6,13 @@
 #property copyright "Gabriel Guedes de Sena"
 #property link      "twitter.com/gabriel_guedes"
 
-//+------------------------------------------------------------------+
-//| defines                                                          |
-//+------------------------------------------------------------------+
-// #define MacrosHello   "Hello, world!"
-// #define MacrosYear    2010
-//+------------------------------------------------------------------+
-//| DLL imports                                                      |
-//+------------------------------------------------------------------+
-// #import "user32.dll"
-//   int      SendMessageA(int hWnd,int Msg,int wParam,int lParam);
-// #import "my_expert.dll"
-//   int      ExpertRecalculate(int wParam,int lParam);
-// #import
-//+------------------------------------------------------------------+
-//| EX5 imports                                                      |
-//+------------------------------------------------------------------+
-// #import "stdlib.ex5"
-//   string ErrorDescription(int error_code);
-// #import
-//+------------------------------------------------------------------+
-
-
-// Class Definition
 class CMyPending
 {
   private:
     void OrderCount(string pSymbol);
-    bool SetPendingByMagic(ulong pMagic);
     int BuyLimitCount, SellLimitCount, BuyStopCount, SellStopCount, BuyStopLimitCount, SellStopLimitCount, TotalPendingCount;
     ulong PendingTickets[];
-    ulong mPendingByMagic[];
+  
   public:
         CMyPending(void);
     int BuyLimit(string pSymbol); 
@@ -47,7 +23,7 @@ class CMyPending
     int SellStopLimit(string pSymbol);
     int TotalPending(string pSymbol);
     void GetTickets(string pSymbol, ulong &pTickets[]);
-    void GetTicketsByMagic(ulong &pTickets[]);
+    bool GetAllByMagic(ulong pMagic, ulong &tickets[]);    
     bool CancelAllByMagic(ulong pMagic);
     bool IsPending(ulong pTicket);
     bool DeleteOrder(ulong pTicket, ulong pMagic);
@@ -109,16 +85,20 @@ void CMyPending::OrderCount(string pSymbol)
 //+------------------------------------------------------------------+
 //|  Set Pending by Magic                                            |
 //+------------------------------------------------------------------+
-bool CMyPending::SetPendingByMagic(ulong pMagic)
+bool CMyPending::GetAllByMagic(ulong pMagic, ulong &tickets[])
 {
    bool orderFound = false;
    
+   int total_pending = 0;
+   
    for(int i = 0; i < OrdersTotal(); i++) {
       ulong ticket = OrderGetTicket(i);
-      if(OrderGetInteger(ORDER_MAGIC, pMagic) && IsPending(ticket))
+      ulong magic = OrderGetInteger(ORDER_MAGIC);
+      if( magic == pMagic && IsPending(ticket))
       {
-         ArrayResize(mPendingByMagic, i+1);
-         mPendingByMagic[i] = ticket;
+         total_pending++;
+         ArrayResize(tickets, total_pending);
+         tickets[total_pending - 1] = ticket;
          orderFound = true;
       }
    }
@@ -131,11 +111,13 @@ bool CMyPending::SetPendingByMagic(ulong pMagic)
 bool CMyPending::CancelAllByMagic(ulong pMagic)
 {
    bool ordersCanceled = true;
+   ulong tickets[];
    
-   SetPendingByMagic(pMagic);
-   for(int i = 0; i < ArraySize(mPendingByMagic); i++)
+   GetAllByMagic(pMagic, tickets);
+   
+   for(int i = 0; i < ArraySize(tickets); i++)
    {
-      ordersCanceled = DeleteOrder(mPendingByMagic[i], pMagic);
+      ordersCanceled = DeleteOrder(tickets[i], pMagic);
       if(!ordersCanceled) break;
    }
    
@@ -249,15 +231,6 @@ int CMyPending::TotalPending(string pSymbol)
 void CMyPending::GetTickets(string pSymbol,ulong &pTickets[])
 {
   OrderCount(pSymbol);
-  ArrayCopy(pTickets,PendingTickets);
-  return;
-}
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-void CMyPending::GetTicketsByMagic(ulong &pTickets[])
-{
-  OrderCount(_Symbol);
   ArrayCopy(pTickets,PendingTickets);
   return;
 }
