@@ -7,33 +7,41 @@
 #property link      "twitter.com/gabriel_guedes"
 #property version   "1.00"
 
-#include <zeroesq\MyPosition.mqh>
+#include <zeroesq\Position.mqh>
+#include <zeroesq\History.mqh>
 #include <zeroesq\MyPriceBars.mqh>
 #include <zeroesq\MyUtils.mqh>
-#include <zeroesq\MyReport.mqh>
 #include <zeroesq\MyChart.mqh>
 #include <zeroesq\MyConstraints.mqh>
 #include <zeroesq\MyPending.mqh>
+#include <zeroesq\MyTrade.mqh>
 
 //+------------------------------------------------------------------+
 //| Inputs                                                           |
 //+------------------------------------------------------------------+
-input string   inp_expert_name = "908_arame_limitado";      //Expert Name
-input uint     inp_ma_period = 20;                          //MA Period
-input double   inp_deviation = 2;                           //Standard Deviation
-input double   inp_buy_level = 0.6;                         //%B for buying
-input double   inp_sell_level = 0.4;                        //%B for selling
-input double   inp_di_limit = 30.0;                         //DI+/DI- limit
+input ulong    inp_magic = 123456789;  //Magic Number
+input uint     inp_ma_period = 20;     //MA Period
+input double   inp_deviation = 2;      //Standard Deviation
+input double   inp_buy_level = 0.6;    //%B for buying
+input double   inp_sell_level = 0.4;   //%B for selling
+input double   inp_di_limit = 30.0;    //DI+/DI- limit
+input double   inp_risk_reward_ratio = 2.0;
+input bool     inp_day_trade = false;
 input myenum_directions inpDirection = BOTH;
 
 
 //+------------------------------------------------------------------+
+//| Global Variables                                                 |
+//+------------------------------------------------------------------+
+double volume = 0.00;
+
+//+------------------------------------------------------------------+
 //| My Basic Objects                                                 |
 //+------------------------------------------------------------------+
-CMyPosition position;
-CMyBars     bars;
+Position position(inp_magic);
+History history;
 CMyUtils    utils;
-CMyReport   report;
+CMyBars     bars;
 CMyChart    chart;
 CMyTrade    trade;
 MyConstraints constraints;
@@ -44,27 +52,16 @@ CMyPending  pending;
 int bands_handle, adx_handle, atr_handle, pct_b_handle;
 double base_line[], lower_band[], upper_band[], adx[], di_plus[], di_minus[], atr[], pct_b[];
 //+------------------------------------------------------------------+
-//| Global Variables                                                 |
-//+------------------------------------------------------------------+
-double volume = 0.00;
-//+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit()
 {
-   report.SetStartTime();
 
-   if(!utils.IsValidExpertName(inp_expert_name)) {
-      return(INIT_FAILED);
-   }
-
-   ulong magic_number = utils.StringToMagic(inp_expert_name);
-   if (!utils.LockMagic(magic_number))
+   if(!utils.LockMagic(inp_magic))
       return(INIT_FAILED);
 
-   position.SetMagic(magic_number);
-   
-   constraints.SetDayTradeTime(9, 30, 17, 15);
+   if(inp_day_trade)
+      constraints.SetDayTradeTime(9, 30, 17, 15);
 
    volume = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
 
@@ -95,10 +92,9 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
 {
-//--- destroy timer
    EventKillTimer();
 
-   utils.UnlockMagic(position.GetMagic());
+   utils.UnlockMagic(inp_magic);
 
 }
 //+------------------------------------------------------------------+
@@ -109,47 +105,38 @@ void OnTick()
    bars.SetInfo(3);
    MqlRates current_bar = bars.GetOne(0);
    MqlRates last_bar = bars.GetOne(1);
-   double last_deal = SymbolInfoDouble(_Symbol, SYMBOL_LAST);
+   bool is_trade_time = constraints.DayTradeTimeCheck(current_bar.time);
    
-   position.Update(current_bar.time);
+   position.update_profit();
    
    GetIndicators();
      
    double entry = 0.00, sl = 0.00, tp = 0.00;
    myenum_action action = DO_NOTHING;
-   if(bars.IsNewBar()) {
-      action = Brain(last_bar.close, last_deal, current_bar.time, entry, sl, tp);
+   if(bars.IsNewBar() && is_trade_time) {
+      action = Brain(last_bar, current_bar, entry, sl, tp);
    }
 
    
-   if(position.IsOpen()) {                    //---positioned
 
-   }
-   else {                                     //---flat
+   if(position.is_flat()){                                   //---flat
       if(action != DO_NOTHING) {
-         pending.CancelAllByMagic(position.GetMagic());
+         pending.CancelAllByMagic(inp_magic);
       }
       
       if(action == GO_LONG && inpDirection != SHORT_ONLY) {
-         position.BuyLimit(volume, entry, sl, tp);
+         trade.BuyLimit(inp_magic, volume, entry, sl, tp);
       } 
       
       else if(action == GO_SHORT && inpDirection != LONG_ONLY) {
-         position.SellLimit(volume, entry, sl, tp);
+         trade.SellLimit(inp_magic, volume, entry, sl, tp);
       }
    }
    
-//   if(entry_occurred) {
-//      position.Update(current_bar.time);
-//      position.UpdateLastEntry(current_bar.time);
-//      if(inp_use_SLTP) CalcSLTP();
-//   }
-//   
-//   if(exit_occurred) {
-//      position.Update(current_bar.time);
-//      position.UpdateLastExit(current_bar.time);
-//   }
- 
+   else {                                                   //---positioned
+      if(!is_trade_time) trade.Close(inp_magic);
+   }   
+   
 }
 //+------------------------------------------------------------------+
 //| Timer function                                                   |
@@ -163,7 +150,6 @@ void OnTimer()
 //+------------------------------------------------------------------+
 void OnTrade()
 {
-//---
 
 }
 //+------------------------------------------------------------------+
@@ -173,7 +159,10 @@ void OnTradeTransaction(const MqlTradeTransaction& trans,
                         const MqlTradeRequest& request,
                         const MqlTradeResult& result)
 {
-   
+   if(trans.type == TRADE_TRANSACTION_DEAL_ADD){
+      position.update();
+      history.update_deals_of_the_day(inp_magic);
+   }
 }
 
 //+------------------------------------------------------------------+
@@ -182,10 +171,6 @@ void OnTradeTransaction(const MqlTradeTransaction& trans,
 double OnTester()
 {
    double ret = 0.0;
-   report.SetEndTime();
-   report.SetDeals(position.GetMagic(), 0, TimeCurrent());
-//report.SaveDealsToCSV();
-
    return(ret);
 }
 //+------------------------------------------------------------------+
@@ -205,7 +190,7 @@ void CalcSLTP(ENUM_POSITION_TYPE type, double entry_price, double &sl, double &t
    }
    
    sl = utils.AdjustToTick(entry_price + (atr[0] * sl_sign * 1));
-   tp = utils.AdjustToTick(entry_price + (atr[0] * tp_sign * 1));
+   tp = utils.AdjustToTick(entry_price + (atr[0] * tp_sign * inp_risk_reward_ratio));
    
 }
 //+------------------------------------------------------------------+
@@ -225,29 +210,31 @@ void GetIndicators(void)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-myenum_action Brain(double last_close, double current_price, datetime current_bar_time, double &entry_price, double &sl, double &tp) {
+myenum_action Brain(MqlRates &last_bar, MqlRates &current_bar, double &entry_price, double &sl, double &tp) {
 
-   double buy_price = last_close - atr[1]*0.5;
-   double sell_price = last_close + atr[1]*0.5;
+   double current_price = SymbolInfoDouble(_Symbol, SYMBOL_LAST);
    
-   //bool di_check = (di_plus[1] < inp_di_limit && di_minus[1] < inp_di_limit);
-   bool di_check = true;
+   double buy_price = last_bar.close - atr[1]*0.6;
+   double sell_price = last_bar.close + atr[1]*0.6;
+   
+   bool di_check = (di_plus[1] < inp_di_limit && di_minus[1] < inp_di_limit);
    bool b_long_check = pct_b[1] >= inp_buy_level;
    bool b_short_check = pct_b[1] <= inp_sell_level;
-   bool bar_is_clear = (current_bar_time != position.GetLastEntry() && current_bar_time != position.GetLastExit());
+   
+   bool bar_is_tradable = (current_bar.time != history.get_last_deal_time());
    bool can_sell_limit = current_price < sell_price;
    bool can_buy_limit = current_price > buy_price;
    
-   if(di_check && b_long_check && can_buy_limit && bar_is_clear) {
+   if(di_check && b_long_check && can_buy_limit && bar_is_tradable) {
       entry_price = utils.AdjustToTick(buy_price);
       CalcSLTP(POSITION_TYPE_BUY, entry_price, sl, tp);
       return(GO_LONG);
    }
-   else if(di_check && b_short_check && can_sell_limit && bar_is_clear) {
+   else if(di_check && b_short_check && can_sell_limit && bar_is_tradable) {
       entry_price = utils.AdjustToTick(sell_price);
       CalcSLTP(POSITION_TYPE_SELL, entry_price, sl, tp);
       return(GO_SHORT);
    }
     
-   return(DO_NOTHING);
+   return(WAIT_NEXT_SIGNAL);
 }
