@@ -80,7 +80,6 @@ void CalculatePriceDensity(int start_pos, int rates_total, const double& high[],
       }
       
       price_density_buffer[i] = numerator / denominator;
-      //price_density_buffer[i] = double(i);
    }
 
 }
