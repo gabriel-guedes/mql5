@@ -213,5 +213,6 @@ enum myenum_action
    GO_LONG,
    GO_SHORT,
    DO_NOTHING,
+   WAIT_NEXT_SIGNAL,
 };
 //+------------------------------------------------------------------+
